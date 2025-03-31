@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import { ThemeProvider } from "@/components/theme-provider"
+import { ThemeProvider } from "@/components/providers/theme-provider"
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -15,8 +15,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Absolutely Desi",
-  description: "Ecommerce Store for Indian wear",
+  title: "Bluebird Edu",
+  description: "Mock test platform for pilot exam preparation",
 };
 
 export default function RootLayout({

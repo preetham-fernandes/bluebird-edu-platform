@@ -1,0 +1,137 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                Int                 @id @default(autoincrement())
+  email             String              @unique
+  name              String
+  createdAt         DateTime            @default(now())
+  lastLogin         DateTime?
+  timezone          String?             @default("UTC")
+  deviceType        String?             // mobile, tablet, desktop
+  testAttempts      TestAttempt[]
+  subscriptions     Subscription[]
+  studyMaterialViews StudyMaterialView[]
+}
+
+model Aircraft {
+  id            Int             @id @default(autoincrement())
+  name          String
+  type          String          // Boeing, Airbus, etc.
+  isActive      Boolean         @default(true)
+  tests         Test[]
+  subscriptions Subscription[]
+}
+
+model Subject {
+  id          Int     @id @default(autoincrement())
+  name        String
+  description String?
+  tests       Test[]
+}
+
+model Test {
+  id             Int           @id @default(autoincrement())
+  title          String
+  subjectId      Int
+  subject        Subject       @relation(fields: [subjectId], references: [id])
+  aircraftId     Int
+  aircraft       Aircraft      @relation(fields: [aircraftId], references: [id])
+  content        Json          // Questions, answers, etc.
+  totalQuestions Int
+  passingScore   Float         // e.g., 70.0 for 70%
+  timeLimit      Int           // in minutes
+  lastUpdated    DateTime      @default(now())
+  updatedBy      Int           // admin user ID
+  isActive       Boolean       @default(true)
+  testAttempts   TestAttempt[]
+}
+
+model TestAttempt {
+  id                Int                 @id @default(autoincrement())
+  userId            Int
+  user              User                @relation(fields: [userId], references: [id])
+  testId            Int
+  test              Test                @relation(fields: [testId], references: [id])
+  startedAt         DateTime            @default(now())
+  completedAt       DateTime?
+  testSnapshot      Json                // Snapshot of test at time of attempt
+  score             Float?              // Percentage score
+  timeTaken         Int?                // in seconds
+  passFail          Boolean?
+  status            String              @default("in_progress") // in_progress, completed, abandoned
+  questionResponses QuestionResponse[]
+  // Analytics fields
+  attemptNumber     Int                 // 1st attempt, 2nd attempt, etc.
+  deviceType        String?             // mobile, tablet, desktop
+  browserInfo       String?
+  ipLocation        String?             // City/Country
+}
+
+model QuestionResponse {
+  id            Int         @id @default(autoincrement())
+  testAttemptId Int
+  testAttempt   TestAttempt @relation(fields: [testAttemptId], references: [id])
+  questionId    String      // ID of question within test
+  userAnswer    String?
+  isCorrect     Boolean?
+  timeTaken     Int?        // in seconds
+  answeredAt    DateTime    @default(now())
+  sequenceNumber Int        // Position in the test
+}
+
+model Subscription {
+  id             Int      @id @default(autoincrement())
+  userId         Int
+  user           User     @relation(fields: [userId], references: [id])
+  aircraftId     Int
+  aircraft       Aircraft @relation(fields: [aircraftId], references: [id])
+  startDate      DateTime @default(now())
+  endDate        DateTime
+  status         String   @default("active") // active, expired, cancelled
+  paymentId      String?
+  amount         Float
+  currency       String   @default("INR")
+  purchaseDevice String?  // mobile, desktop, etc.
+}
+
+model StudyMaterialView {
+  id               Int      @id @default(autoincrement())
+  userId           Int
+  user             User     @relation(fields: [userId], references: [id])
+  materialId       Int      // Reference to your study material
+  viewedAt         DateTime @default(now())
+  timeSpent        Int?     // in seconds
+  completionPercent Float?  // if tracking progress through material
+}
+
+model AdminActivityLog {
+  id         Int      @id @default(autoincrement())
+  adminId    Int
+  action     String   // e.g., "update_test", "delete_test"
+  entityType String   // e.g., "test", "user", "subscription"
+  entityId   Int
+  details    Json?
+  timestamp  DateTime @default(now())
+}
+
+model TestChangeLog {
+  id              Int      @id @default(autoincrement())
+  testId          Int
+  changedBy       Int      // admin ID
+  changeDate      DateTime @default(now())
+  changeType      String   // "created", "updated", "deleted"
+  previousContent Json?    // Optional backup of previous content
+}

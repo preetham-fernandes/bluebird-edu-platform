@@ -1,13 +1,25 @@
-import { ThemeToggle } from "@/components/theme-toggle"
-
+import { HeroSection } from "@/components/home/hero-section"
+import { FeaturesSection } from "@/components/home/features-section"
+import { HowItWorksSection } from "@/components/home/how-it-works-section"
+import { PricingSection } from "@/components/home/pricing-section"
+import { AboutSection } from "@/components/home/about-section"
+import { CTASection } from "@/components/home/cta-section"
+import { Footer } from "@/components/home/footer"
+import { Header } from "@/components/home/header"
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-24">
-      <div className="absolute top-4 right-4">
-        <ThemeToggle />
-      </div>
-      <h1 className="text-4xl font-bold mb-8">Absolutely Desi | Ecommerce store for Indian wear</h1>
-    </main>
-  );
+    <div className="flex min-h-screen flex-col">
+      <Header />
+      <main className="flex-1">
+        <HeroSection />
+        <FeaturesSection />
+        <HowItWorksSection />
+        <PricingSection />
+        <AboutSection />
+        <CTASection />
+      </main>
+      <Footer />
+    </div>
+  )
 }
