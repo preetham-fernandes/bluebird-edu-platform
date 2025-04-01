@@ -1,4 +1,4 @@
-// src/components/dashboard/sidebar.tsx
+// src/components/user/Sidebar.tsx
 "use client";
 
 import Link from 'next/link';
@@ -31,43 +31,48 @@ const navItems: NavItem[] = [
     icon: <Home className="h-5 w-5" />,
   },
   {
-    title: 'Mock Tests',
+    title: 'Airbus A320',
     href: '/dashboard/mock-tests',
     icon: <ClipboardList className="h-5 w-5" />,
     submenu: [
       {
-        title: 'Boeing 737 Max',
+        title: 'Mock Exam',
         href: '/dashboard/mock-tests/boeing-737-max',
         icon: <ChevronRight className="h-4 w-4" />,
       },
       {
-        title: 'Airbus A320',
+        title: 'Practice Test',
+        href: '/dashboard/mock-tests/airbus-a320',
+        icon: <ChevronRight className="h-4 w-4" />,
+      },
+      {
+        title: 'Study Material',
         href: '/dashboard/mock-tests/airbus-a320',
         icon: <ChevronRight className="h-4 w-4" />,
       },
     ],
   },
   {
-    title: 'Practice Tests',
-    href: '/dashboard/practice-tests',
-    icon: <BookOpen className="h-5 w-5" />,
+    title: 'Boeing 737 MAX',
+    href: '/dashboard/mock-tests',
+    icon: <ClipboardList className="h-5 w-5" />,
     submenu: [
       {
-        title: 'Boeing 737 Max',
-        href: '/dashboard/practice-tests/boeing-737-max',
+        title: 'Mock Exam',
+        href: '/dashboard/mock-tests/boeing-737-max',
         icon: <ChevronRight className="h-4 w-4" />,
       },
       {
-        title: 'Airbus A320',
-        href: '/dashboard/practice-tests/airbus-a320',
+        title: 'Practice Test',
+        href: '/dashboard/mock-tests/airbus-a320',
+        icon: <ChevronRight className="h-4 w-4" />,
+      },
+      {
+        title: 'Study Material',
+        href: '/dashboard/mock-tests/airbus-a320',
         icon: <ChevronRight className="h-4 w-4" />,
       },
     ],
-  },
-  {
-    title: 'Study Material',
-    href: '/dashboard/study-material',
-    icon: <FileText className="h-5 w-5" />,
   },
   {
     title: 'Community',
@@ -78,11 +83,6 @@ const navItems: NavItem[] = [
     title: 'Profile',
     href: '/dashboard/profile',
     icon: <User className="h-5 w-5" />,
-  },
-  {
-    title: 'Settings',
-    href: '/dashboard/settings',
-    icon: <Settings className="h-5 w-5" />,
   },
 ];
 

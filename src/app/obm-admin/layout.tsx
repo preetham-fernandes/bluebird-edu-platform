@@ -2,8 +2,8 @@
 "use client";
 
 import { ReactNode, useState, useEffect } from 'react';
-import Header from '@/components/user/Header';
-import Sidebar from '@/components/user/Sidebar';
+import Header from '@/components/admin/Header';
+import Sidebar from '@/components/admin/Sidebar';
 import { Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 

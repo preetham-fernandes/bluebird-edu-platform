@@ -1,4 +1,4 @@
-// src/components/dashboard/header.tsx
+// src/components/user/Header.tsx
 "use client";
 
 import Link from 'next/link';
@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Bell, User, LogOut, Menu } from 'lucide-react';
+import { Bell, User, LogOut, Menu, Plane } from 'lucide-react';
 
 interface HeaderProps {
   showMenuButton?: boolean;
@@ -31,12 +31,7 @@ export default function Header({ showMenuButton = false, onMenuClick }: HeaderPr
         )}
         
         <Link href="/dashboard" className="font-bold text-lg md:text-xl text-primary flex items-center gap-2">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-primary hidden sm:block">
-            <path d="M4 22H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M12 6L7 11L12 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M17 11H7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M17 2L12 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
+        <Plane className="h-6 w-6 text-primary" />
           <span>BlueBird-Edu</span>
         </Link>
       </div>
@@ -66,7 +61,7 @@ export default function Header({ showMenuButton = false, onMenuClick }: HeaderPr
             <DropdownMenuSeparator />
             <DropdownMenuItem className="text-destructive focus:text-destructive">
               <LogOut className="mr-2 h-4 w-4" />
-              <span>Log out</span>
+              <Link href="/" className="flex w-full">Log out</Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

@@ -1,12 +1,21 @@
 {
   "name": "bluebird-edu",
   "version": "0.1.0",
+  "type": "module",
   "private": true,
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db:seed": "prisma db seed",
+    "db:reset": "prisma migrate reset --force",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:studio": "prisma studio"
   },
   "dependencies": {
     "@prisma/client": "^6.5.0",
@@ -25,7 +34,8 @@
     "react": "^18",
     "react-dom": "^18",
     "tailwind-merge": "^3.0.2",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "tsx": "^4.19.3"
   },
   "devDependencies": {
     "@types/node": "^20",
@@ -35,6 +45,7 @@
     "eslint-config-next": "14.2.25",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
+    "ts-node": "^10.9.2",
     "typescript": "^5"
   }
 }
