@@ -49,3 +49,21 @@ export const deleteAircraft = async (id: number): Promise<Aircraft> => {
     data: { isActive: false }
   });
 };
+
+export const getAircraftBySlug = async (slug: string): Promise<Aircraft | null> => {
+  // Convert slug to aircraft name (e.g., 'boeing-737-max' to 'Boeing 737 Max')
+  const nameFromSlug = slug
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+  
+  return prisma.aircraft.findFirst({
+    where: {
+      OR: [
+        { name: { contains: nameFromSlug} },
+        { name: { equals: nameFromSlug} }
+      ],
+      isActive: true
+    }
+  });
+};

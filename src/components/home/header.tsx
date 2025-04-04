@@ -33,7 +33,7 @@ export function Header() {
               <Link href="#about">About</Link>
             </Button>
             <Button variant="default" className="text-sm font-medium" asChild>
-              <Link href="/register">Get Started</Link>
+              <Link href="/dashboard">Get Started</Link>
             </Button>
             <ThemeToggle />
           </nav>

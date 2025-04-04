@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -16,47 +13,79 @@ datasource db {
 model User {
   id                Int                 @id @default(autoincrement())
   email             String              @unique
-  name              String
+  password          String?             // Optional if using OAuth
+  username          String?             // Username can be derived from full name
+  name              String              // Full name
+  profileImg        String?             // Profile image URL
   createdAt         DateTime            @default(now())
   lastLogin         DateTime?
   timezone          String?             @default("UTC")
   deviceType        String?             // mobile, tablet, desktop
   testAttempts      TestAttempt[]
-  subscriptions     Subscription[]
-  studyMaterialViews StudyMaterialView[]
 }
 
 model Aircraft {
   id            Int             @id @default(autoincrement())
-  name          String
-  type          String          // Boeing, Airbus, etc.
-  isActive      Boolean         @default(true)
+  name          String          // Boeing-737-max, Airbus-A320, etc.
+  type          String          // Boeing, Airbus, etc
   tests         Test[]
-  subscriptions Subscription[]
+  titles        Title[]         // New relation to Title model
 }
 
-model Subject {
-  id          Int     @id @default(autoincrement())
+model TestType {
+  id        Int     @id @default(autoincrement())
+  type      String  // mock or practice
+  titles    Title[]
+}
+
+model Title {
+  id          Int       @id @default(autoincrement())
   name        String
-  description String?
-  tests       Test[]
+  aircraftId  Int
+  aircraft    Aircraft  @relation(fields: [aircraftId], references: [id])
+  testTypeId  Int
+  testType    TestType  @relation(fields: [testTypeId], references: [id])
+  tests       Test[]    // One title can have multiple tests (versions)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
 
 model Test {
   id             Int           @id @default(autoincrement())
   title          String
-  subjectId      Int
-  subject        Subject       @relation(fields: [subjectId], references: [id])
+  titleId        Int?          // Optional link to Title model
+  titleRef       Title?        @relation(fields: [titleId], references: [id])
   aircraftId     Int
   aircraft       Aircraft      @relation(fields: [aircraftId], references: [id])
-  content        Json          // Questions, answers, etc.
+  questions      Question[]
   totalQuestions Int
-  passingScore   Float         // e.g., 70.0 for 70%
-  timeLimit      Int           // in minutes
+  timeLimit      Int?          // in minutes, nullable for practice tests
   lastUpdated    DateTime      @default(now())
   updatedBy      Int           // admin user ID
-  isActive       Boolean       @default(true)
+  isActive       Boolean       @default(true) // Only one active test per title
+  createdAt      DateTime      @default(now())
   testAttempts   TestAttempt[]
+}
+
+model Question {
+  id              Int               @id @default(autoincrement())
+  testId          Int
+  test            Test              @relation(fields: [testId], references: [id])
+  questionNumber  Int               // Position/order in the test
+  questionText    String            @db.Text
+  correctAnswer   String            // A, B, C, D
+  explanation     String?           @db.Text
+  options         Option[]
+  responses       QuestionResponse[]
+}
+
+model Option {
+  id           Int      @id @default(autoincrement())
+  questionId   Int
+  question     Question @relation(fields: [questionId], references: [id])
+  optionText   String   @db.Text
+  isCorrect    Boolean
+  label        String   // A, B, C, D
 }
 
 model TestAttempt {
@@ -84,54 +113,44 @@ model QuestionResponse {
   id            Int         @id @default(autoincrement())
   testAttemptId Int
   testAttempt   TestAttempt @relation(fields: [testAttemptId], references: [id])
-  questionId    String      // ID of question within test
-  userAnswer    String?
+  questionId    Int
+  question      Question    @relation(fields: [questionId], references: [id])
+  userAnswer    String?     // User selected option (A, B, C, D)
   isCorrect     Boolean?
   timeTaken     Int?        // in seconds
   answeredAt    DateTime    @default(now())
   sequenceNumber Int        // Position in the test
 }
 
-model Subscription {
-  id             Int      @id @default(autoincrement())
-  userId         Int
-  user           User     @relation(fields: [userId], references: [id])
-  aircraftId     Int
-  aircraft       Aircraft @relation(fields: [aircraftId], references: [id])
-  startDate      DateTime @default(now())
-  endDate        DateTime
-  status         String   @default("active") // active, expired, cancelled
-  paymentId      String?
-  amount         Float
-  currency       String   @default("INR")
-  purchaseDevice String?  // mobile, desktop, etc.
-}
-
-model StudyMaterialView {
-  id               Int      @id @default(autoincrement())
-  userId           Int
-  user             User     @relation(fields: [userId], references: [id])
-  materialId       Int      // Reference to your study material
-  viewedAt         DateTime @default(now())
-  timeSpent        Int?     // in seconds
-  completionPercent Float?  // if tracking progress through material
+model AdminUser {
+  id                Int                 @id @default(autoincrement())
+  email             String              @unique
+  name              String
+  password          String
+  role              String              @default("admin") // admin, super_admin
+  createdAt         DateTime            @default(now())
+  lastLogin         DateTime?
+  activityLogs      AdminActivityLog[]
+  testChanges       TestChangeLog[]
 }
 
 model AdminActivityLog {
-  id         Int      @id @default(autoincrement())
+  id         Int       @id @default(autoincrement())
   adminId    Int
-  action     String   // e.g., "update_test", "delete_test"
-  entityType String   // e.g., "test", "user", "subscription"
+  admin      AdminUser @relation(fields: [adminId], references: [id])
+  action     String    // e.g., "update_test", "delete_test"
+  entityType String    // e.g., "test", "user", "subscription"
   entityId   Int
   details    Json?
-  timestamp  DateTime @default(now())
+  timestamp  DateTime  @default(now())
 }
 
 model TestChangeLog {
-  id              Int      @id @default(autoincrement())
+  id              Int       @id @default(autoincrement())
   testId          Int
-  changedBy       Int      // admin ID
-  changeDate      DateTime @default(now())
-  changeType      String   // "created", "updated", "deleted"
-  previousContent Json?    // Optional backup of previous content
+  changedBy       Int       // admin ID
+  admin           AdminUser @relation(fields: [changedBy], references: [id])
+  changeDate      DateTime  @default(now())
+  changeType      String    // "created", "updated", "deleted"
+  previousContent Json?     // Optional backup of previous content
 }
