@@ -5,7 +5,6 @@ import { ReactNode, useState, useEffect } from 'react';
 import Header from '@/components/admin/Header';
 import Sidebar from '@/components/admin/Sidebar';
 import { Menu } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -60,18 +59,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         >
           <Sidebar />
         </div>
-        
-        {/* Mobile menu toggle button (when sidebar is closed) */}
-        {isMobile && !sidebarOpen && (
-          <Button 
-            variant="outline" 
-            size="icon" 
-            className="fixed bottom-4 left-4 z-30 rounded-full shadow-lg"
-            onClick={() => setSidebarOpen(true)}
-          >
-            <Menu className="h-5 w-5" />
-          </Button>
-        )}
         
         {/* Main content */}
         <main className={`

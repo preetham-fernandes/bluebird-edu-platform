@@ -3,9 +3,6 @@ import { Aircraft } from '@prisma/client';
 
 export const getAllAircraft = async (): Promise<Aircraft[]> => {
   return prisma.aircraft.findMany({
-    where: {
-      isActive: true
-    },
     orderBy: {
       name: 'asc'
     }
@@ -43,10 +40,9 @@ export const updateAircraft = async (
 };
 
 export const deleteAircraft = async (id: number): Promise<Aircraft> => {
-  // Soft delete by setting isActive to false
-  return prisma.aircraft.update({
-    where: { id },
-    data: { isActive: false }
+  // Hard delete the aircraft
+  return prisma.aircraft.delete({
+    where: { id }
   });
 };
 
@@ -63,7 +59,6 @@ export const getAircraftBySlug = async (slug: string): Promise<Aircraft | null> 
         { name: { contains: nameFromSlug} },
         { name: { equals: nameFromSlug} }
       ],
-      isActive: true
     }
   });
 };
