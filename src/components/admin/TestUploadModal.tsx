@@ -125,7 +125,7 @@ export default function TestUploadModal({
           <FileUploadField
             onFileSelect={handleFileSelect}
             isUploading={isUploading}
-            error={uploadError}
+            error={uploadError || undefined}
             success={uploadSuccess ? 'File uploaded successfully!' : undefined}
           />
           

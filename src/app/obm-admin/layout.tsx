@@ -4,7 +4,6 @@
 import { ReactNode, useState, useEffect } from 'react';
 import Header from '@/components/admin/Header';
 import Sidebar from '@/components/admin/Sidebar';
-import { Menu } from 'lucide-react';
 
 interface DashboardLayoutProps {
   children: ReactNode;

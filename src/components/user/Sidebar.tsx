@@ -11,7 +11,6 @@ import {
   FileText, 
   Users, 
   User, 
-  Settings,
   ChevronDown,
   ChevronRight
 } from 'lucide-react';
@@ -32,34 +31,34 @@ const navItems: NavItem[] = [
   },
   {
     title: 'Airbus A320',
-    href: '/airbus-a320',
+    href: '',
     icon: <ClipboardList className="h-5 w-5" />,
     submenu: [
       {
-        title: 'Study Test',
-        href: '/airbus-a320/mock-test',
+        title: 'Test Series',
+        href: '',
         icon: <ChevronRight className="h-4 w-4" />,
       },
       {
         title: 'Practice Exam',
-        href: '/airbus-a320/practice-test',
-        icon: <ChevronRight className="h-4 w-4" />,
+        href: '/dashboard',
+        icon: <BookOpen className="h-4 w-4" />,
       },
       {
         title: 'Study Material',
-        href: '/airbus-a320/study-material',
-        icon: <ChevronRight className="h-4 w-4" />,
+        href: '/dashboard',
+        icon: <FileText className="h-4 w-4" />,
       },
     ],
   },
   {
     title: 'Boeing 737 MAX',
-    href: '/boeing-737-max',
+    href: '/dashboard',
     icon: <ClipboardList className="h-5 w-5" />,
     submenu: [
       {
         title: 'Study Test',
-        href: '/boeing-737-max/mock-test',
+        href: '/dashboard',
         icon: <ChevronRight className="h-4 w-4" />,
       },
       {
@@ -69,19 +68,19 @@ const navItems: NavItem[] = [
       },
       {
         title: 'Study Material',
-        href: '/boeing-737-max/study-material',
+        href: '/dashboard',
         icon: <ChevronRight className="h-4 w-4" />,
       },
     ],
   },
   {
     title: 'Community',
-    href: '/community',
+    href: '/dashboard',
     icon: <Users className="h-5 w-5" />,
   },
   {
     title: 'Profile',
-    href: '/profile',
+    href: '/dashboard',
     icon: <User className="h-5 w-5" />,
   },
 ];

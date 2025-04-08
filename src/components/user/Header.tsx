@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Bell, User, LogOut, Menu, Plane } from 'lucide-react';
+import { User, LogOut, Menu, Plane } from 'lucide-react';
 
 interface HeaderProps {
   showMenuButton?: boolean;

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircle } from "lucide-react";
@@ -18,9 +18,8 @@ const QUESTIONS_PER_PAGE = 5;
 const DEMO_USER_ID = 1;
 
 export default function PracticeTestPage() {
-  const router = useRouter();
   const params = useParams();
-  const { aircraft, title, test } = params;
+  const { aircraft, test } = params;
   
   // State for test data and UI
   const [testData, setTestData] = useState<Test | null>(null);
@@ -231,7 +230,7 @@ export default function PracticeTestPage() {
         <AlertCircle className="h-4 w-4" />
         <AlertTitle>Test Not Found</AlertTitle>
         <AlertDescription>
-          The practice test you're looking for doesn't exist. Please go back and select a different test.
+          The practice test you&apos;re looking for doesn&apos;t exist. Please go back and select a different test.
         </AlertDescription>
       </Alert>
     );

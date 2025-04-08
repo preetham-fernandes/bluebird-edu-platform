@@ -37,7 +37,6 @@ interface TestResultsProps {
 }
 
 export default function TestResults({
-  testId,
   aircraftSlug,
   testTitle,
   subject,
@@ -98,9 +97,9 @@ export default function TestResults({
               value={score} 
               className={cn(
                 "h-2.5",
-                passStatus ? "bg-green-100 dark:bg-green-900/30" : "bg-red-100 dark:bg-red-900/30"
-              )}
-              indicatorClassName={passStatus ? "bg-green-600" : "bg-red-600"}
+                passStatus ? "bg-green-100 dark:bg-green-900/30" : "bg-red-100 dark:bg-red-900/30",
+    passStatus ? "[--progress-foreground:theme(colors.green.600)]" : "[--progress-foreground:theme(colors.red.600)]"
+  )}
             />
           </div>
         </CardContent>
@@ -125,7 +124,7 @@ export default function TestResults({
       <div className="space-y-4">
         <h3 className="text-lg font-semibold">Question Review</h3>
         
-        {questions.map((question, index) => {
+        {questions.map((question) => {
           const response = responses.find(r => r.questionId === question.id);
           const isExpanded = expandedQuestions.includes(question.id);
           

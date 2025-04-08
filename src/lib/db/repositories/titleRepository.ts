@@ -24,7 +24,7 @@ export const getTitlesByAircraftName = async (aircraftName: string) => {
       aircraft: {
         name: {
           contains: aircraftName,
-          mode: 'insensitive',
+          // mode: 'insensitive',
         },
       },
     },
@@ -60,7 +60,7 @@ export const getTitleByNameAndAircraftId = async (name: string, aircraftId: numb
     where: {
       name: {
         equals: name,
-        mode: 'insensitive',
+        // mode: 'insensitive',
       },
       aircraftId,
     },
