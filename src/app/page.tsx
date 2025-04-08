@@ -32,7 +32,7 @@ export default function Home() {
         className="text-2xl font-mono px-4 py-2"
         asChild
       >
-        <Link href="/boeing-737-max/practice-test">Get Started</Link>
+        <Link href="/dashboard">Get Started</Link>
       </Button>
     </div>
   );

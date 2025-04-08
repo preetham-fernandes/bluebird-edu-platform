@@ -2,7 +2,7 @@
 export default function MockTestPage() {
     return (
       <div>
-        {/* Your content */}
+        Coming soon...
       </div>
     );
   }

@@ -50,13 +50,13 @@ export default function Header({ showMenuButton = false, onMenuClick }: HeaderPr
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
-              <Link href="/dashboard/profile" className="flex w-full">Profile</Link>
+              <Link href="/profile" className="flex w-full">Profile</Link>
             </DropdownMenuItem>
             <DropdownMenuItem>
-              <Link href="/dashboard/subscriptions" className="flex w-full">Subscriptions</Link>
+              <Link href="/profile" className="flex w-full">Subscriptions</Link>
             </DropdownMenuItem>
             <DropdownMenuItem>
-              <Link href="/dashboard/settings" className="flex w-full">Settings</Link>
+              <Link href="/profile" className="flex w-full">Settings</Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="text-destructive focus:text-destructive">

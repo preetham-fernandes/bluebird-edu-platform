@@ -12,7 +12,9 @@ import {
   Users, 
   User, 
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  Pen,
+  Plane,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
@@ -31,22 +33,22 @@ const navItems: NavItem[] = [
   },
   {
     title: 'Airbus A320',
-    href: '',
-    icon: <ClipboardList className="h-5 w-5" />,
+    href: '/airbus-a320',
+    icon: <Plane className="h-5 w-5" />,
     submenu: [
       {
         title: 'Test Series',
-        href: '',
-        icon: <ChevronRight className="h-4 w-4" />,
+        href: '/airbus-a320/mock-test',
+        icon: <Pen className="h-4 w-4" />,
       },
       {
-        title: 'Practice Exam',
-        href: '/dashboard',
+        title: 'Practice Test',
+        href: '/airbus-a320/practice-test',
         icon: <BookOpen className="h-4 w-4" />,
       },
       {
         title: 'Study Material',
-        href: '/dashboard',
+        href: '/airbus-a320/study-material',
         icon: <FileText className="h-4 w-4" />,
       },
     ],
@@ -54,33 +56,33 @@ const navItems: NavItem[] = [
   {
     title: 'Boeing 737 MAX',
     href: '/dashboard',
-    icon: <ClipboardList className="h-5 w-5" />,
+    icon: <Plane className="h-5 w-5" />,
     submenu: [
       {
         title: 'Study Test',
-        href: '/dashboard',
-        icon: <ChevronRight className="h-4 w-4" />,
+        href: '/boeing-737-max/mock-test',
+        icon: <Pen className="h-4 w-4" />,
       },
       {
-        title: 'Practice Exam',
+        title: 'Practice Test',
         href: '/boeing-737-max/practice-test',
-        icon: <ChevronRight className="h-4 w-4" />,
+        icon: <BookOpen className="h-4 w-4" />,
       },
       {
         title: 'Study Material',
-        href: '/dashboard',
-        icon: <ChevronRight className="h-4 w-4" />,
+        href: '/boeing-737-max/study-material',
+        icon: <FileText className="h-4 w-4" />,
       },
     ],
   },
   {
     title: 'Community',
-    href: '/dashboard',
+    href: '/community',
     icon: <Users className="h-5 w-5" />,
   },
   {
     title: 'Profile',
-    href: '/dashboard',
+    href: '/profile',
     icon: <User className="h-5 w-5" />,
   },
 ];
