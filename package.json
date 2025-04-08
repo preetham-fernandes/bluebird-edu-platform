@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "NODE_ENV=production node server.js",
+    "start": "next start -p ${PORT-3000}",
     "lint": "next lint",
     "db:seed": "prisma db seed",
     "db:reset": "prisma migrate reset --force",
