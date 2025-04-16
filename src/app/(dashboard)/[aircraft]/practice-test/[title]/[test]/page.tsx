@@ -275,7 +275,7 @@ export default function PracticeTestPage() {
         ))}
       </div>
       
-      <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border px-4 py-3 z-10">
+      <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border px-4 py-3 z-[5]">
         <ProgressHeader
           currentPage={currentPage}
           totalPages={totalPages}

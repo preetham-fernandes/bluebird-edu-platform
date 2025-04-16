@@ -11,7 +11,10 @@ import {
   User, 
   Settings,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  Box,
+  Upload,
+  User2
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
@@ -28,58 +31,73 @@ const navItems: NavItem[] = [
     href: '/obm-admin/dashboard',
     icon: <Home className="h-5 w-5" />,
   },
+  // {
+  //   title: 'Airbus A320',
+  //   href: '/obm-admin/airbus-a320',
+  //   icon: <ClipboardList className="h-5 w-5" />,
+  //   submenu: [
+  //     {
+  //       title: 'Study Test',
+  //       href: '/obm-admin/airbus-a320/mock-test',
+  //       icon: <ChevronRight className="h-4 w-4" />,
+  //     },
+  //     {
+  //       title: 'Practice Exam',
+  //       href: '/obm-admin/airbus-a320/practice-test',
+  //       icon: <ChevronRight className="h-4 w-4" />,
+  //     },
+  //     {
+  //       title: 'Study Material',
+  //       href: '/obm-admin/airbus-a320/study-material',
+  //       icon: <ChevronRight className="h-4 w-4" />,
+  //     },
+  //   ],
+  // },
+  // {
+  //   title: 'Boeing 737 MAX',
+  //   href: '/obm-admin/boeing-737-max',
+  //   icon: <ClipboardList className="h-5 w-5" />,
+  //   submenu: [
+  //     {
+  //       title: 'Study Test',
+  //       href: '/obm-admin/boeing-737-max/mock-test',
+  //       icon: <ChevronRight className="h-4 w-4" />,
+  //     },
+  //     {
+  //       title: 'Practice Exam',
+  //       href: '/obm-admin/boeing-737-max/practice-test',
+  //       icon: <ChevronRight className="h-4 w-4" />,
+  //     },
+  //     {
+  //       title: 'Study Material',
+  //       href: '/obm-admin/boeing-737-max/study-material',
+  //       icon: <ChevronRight className="h-4 w-4" />,
+  //     },
+  //   ],
+  // },
   {
-    title: 'Airbus A320',
-    href: '/obm-admin/airbus-a320',
-    icon: <ClipboardList className="h-5 w-5" />,
-    submenu: [
-      {
-        title: 'Study Test',
-        href: '/obm-admin/airbus-a320/mock-test',
-        icon: <ChevronRight className="h-4 w-4" />,
-      },
-      {
-        title: 'Practice Exam',
-        href: '/obm-admin/airbus-a320/practice-test',
-        icon: <ChevronRight className="h-4 w-4" />,
-      },
-      {
-        title: 'Study Material',
-        href: '/obm-admin/airbus-a320/study-material',
-        icon: <ChevronRight className="h-4 w-4" />,
-      },
-    ],
+    title: 'Content Management',
+    href: '/obm-admin/content-management',
+    icon: <Box className="h-5 w-5" />,
   },
   {
-    title: 'Boeing 737 MAX',
-    href: '/obm-admin/boeing-737-max',
-    icon: <ClipboardList className="h-5 w-5" />,
-    submenu: [
-      {
-        title: 'Study Test',
-        href: '/obm-admin/boeing-737-max/mock-test',
-        icon: <ChevronRight className="h-4 w-4" />,
-      },
-      {
-        title: 'Practice Exam',
-        href: '/obm-admin/boeing-737-max/practice-test',
-        icon: <ChevronRight className="h-4 w-4" />,
-      },
-      {
-        title: 'Study Material',
-        href: '/obm-admin/boeing-737-max/study-material',
-        icon: <ChevronRight className="h-4 w-4" />,
-      },
-    ],
+    title: 'Bulk Upload System',
+    href: '/obm-admin/bulk-upload',
+    icon: <Upload className="h-5 w-5" />,
   },
   {
-    title: 'Community',
-    href: '/community',
+    title: 'User Management',
+    href: '/obm-admin/user-management',
+    icon: <User2 className="h-5 w-5" />,
+  },
+  {
+    title: 'Community Management',
+    href: '/obm-admin/community-management',
     icon: <Users className="h-5 w-5" />,
   },
   {
     title: 'Settings',
-    href: '/settings',
+    href: '/obm-admin/settings',
     icon: <Settings className="h-5 w-5" />,
   },
 ];

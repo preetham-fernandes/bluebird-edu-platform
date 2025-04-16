@@ -45,7 +45,10 @@ export default function QuestionCard({
   };
   
   return (
-    <Card className="w-full mb-4">
+    <Card className="w-full mb-4 relative">
+      <div className="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none">
+        <span className="text-6xl font-bold rotate-12">BLUEBIRD</span>
+      </div>
       <CardHeader>
         <CardTitle className="flex items-center">
           <span className="text-lg font-semibold mr-2">
@@ -72,8 +75,9 @@ export default function QuestionCard({
           {question.options.map((option) => (
             <div 
               key={option.id} 
+              onClick={() => !answered && handleOptionChange(option.label)}
               className={cn(
-                "flex items-start space-x-2 rounded-md border p-3 transition-colors",
+                "flex items-start space-x-2 rounded-md border p-3 transition-colors cursor-pointer",
                 answered && option.label === question.correctAnswer 
                   ? "border-green-500 bg-green-50 dark:bg-green-900/20" 
                   : answered && option.label === selectedOption 
@@ -90,7 +94,7 @@ export default function QuestionCard({
               <Label 
                 htmlFor={`question-${question.id}-option-${option.label}`}
                 className={cn(
-                  "flex-1 cursor-pointer font-normal",
+                  "flex-1 font-normal",
                   answered && option.label === question.correctAnswer 
                     ? "text-green-700 dark:text-green-300" 
                     : answered && option.label === selectedOption 

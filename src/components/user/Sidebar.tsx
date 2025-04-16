@@ -30,50 +30,50 @@ const navItems: NavItem[] = [
     href: '/dashboard',
     icon: <Home className="h-5 w-5" />,
   },
-  {
-    title: 'Airbus A320',
-    href: '/airbus-a320',
-    icon: <Plane className="h-5 w-5" />,
-    submenu: [
-      {
-        title: 'Test Series',
-        href: '/airbus-a320/mock-test',
-        icon: <Pen className="h-4 w-4" />,
-      },
-      {
-        title: 'Practice Test',
-        href: '/airbus-a320/practice-test',
-        icon: <BookOpen className="h-4 w-4" />,
-      },
-      {
-        title: 'Study Material',
-        href: '/airbus-a320/study-material',
-        icon: <FileText className="h-4 w-4" />,
-      },
-    ],
-  },
-  {
-    title: 'Boeing 737 MAX',
-    href: '/dashboard',
-    icon: <Plane className="h-5 w-5" />,
-    submenu: [
-      {
-        title: 'Study Test',
-        href: '/boeing-737-max/mock-test',
-        icon: <Pen className="h-4 w-4" />,
-      },
-      {
-        title: 'Practice Test',
-        href: '/boeing-737-max/practice-test',
-        icon: <BookOpen className="h-4 w-4" />,
-      },
-      {
-        title: 'Study Material',
-        href: '/boeing-737-max/study-material',
-        icon: <FileText className="h-4 w-4" />,
-      },
-    ],
-  },
+  // {
+  //   title: 'Airbus A320',
+  //   href: '/airbus-a320',
+  //   icon: <Plane className="h-5 w-5" />,
+  //   submenu: [
+  //     {
+  //       title: 'Test Series',
+  //       href: '/airbus-a320/mock-test',
+  //       icon: <Pen className="h-4 w-4" />,
+  //     },
+  //     {
+  //       title: 'Practice Test',
+  //       href: '/airbus-a320/practice-test',
+  //       icon: <BookOpen className="h-4 w-4" />,
+  //     },
+  //     {
+  //       title: 'Study Material',
+  //       href: '/airbus-a320/study-material',
+  //       icon: <FileText className="h-4 w-4" />,
+  //     },
+  //   ],
+  // },
+  // {
+  //   title: 'Boeing 737 MAX',
+  //   href: '/dashboard',
+  //   icon: <Plane className="h-5 w-5" />,
+  //   submenu: [
+  //     {
+  //       title: 'Study Test',
+  //       href: '/boeing-737-max/mock-test',
+  //       icon: <Pen className="h-4 w-4" />,
+  //     },
+  //     {
+  //       title: 'Practice Test',
+  //       href: '/boeing-737-max/practice-test',
+  //       icon: <BookOpen className="h-4 w-4" />,
+  //     },
+  //     {
+  //       title: 'Study Material',
+  //       href: '/boeing-737-max/study-material',
+  //       icon: <FileText className="h-4 w-4" />,
+  //     },
+  //   ],
+  // },
   {
     title: 'Community',
     href: '/community',
