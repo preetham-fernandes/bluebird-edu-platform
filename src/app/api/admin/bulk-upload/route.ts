@@ -67,31 +67,30 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create a test entry
-    const test = await prisma.test.create({
-      data: {
-        title: `${subject.name} Test`,
-        titleId: subject.id,
-        aircraftId: aircraftIdNum,
-        totalQuestions: questions.length,
-        // timeLimit is optional, typically set for mock tests
-        timeLimit: null, 
-        updatedBy: 1, // Admin ID (would be from auth context in real app)
-        isActive: true,
-        // Deactivate any previous active tests for this title
-        tests: {
-          updateMany: {
-            where: {
-              titleId: subject.id,
-              isActive: true,
-            },
-            data: {
-              isActive: false,
-            },
-          },
+    // First, deactivate any existing active tests for this title
+    await prisma.test.updateMany({
+        where: {
+          titleId: subject.id,
+          isActive: true,
         },
-      },
-    });
+        data: {
+          isActive: false,
+        },
+      });
+      
+      // Then create a new test entry
+      const test = await prisma.test.create({
+        data: {
+          title: `${subject.name} Test`,
+          titleId: subject.id,
+          aircraftId: aircraftIdNum,
+          totalQuestions: questions.length,
+          // timeLimit is optional, typically set for mock tests
+          timeLimit: null, 
+          updatedBy: 1, // Admin ID (would be from auth context in real app)
+          isActive: true,
+        },
+      });
 
     // Create questions and options
     const errorsEncountered = 0;

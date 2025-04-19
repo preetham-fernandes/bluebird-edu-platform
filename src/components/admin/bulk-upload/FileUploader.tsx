@@ -2,8 +2,13 @@
 
 import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Upload, File, Download, FileText, AlertTriangle, Check } from 'lucide-react';
-import { Progress } from '@/components/ui/progress';
+import { Upload, FileText, AlertTriangle, Download, FileDown } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface FileUploaderProps {
   selectedFile: File | null;
@@ -19,6 +24,7 @@ export default function FileUploader({
   const [dragActive, setDragActive] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const [fileValidationErrors, setFileValidationErrors] = useState<string[]>([]);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const handleDrag = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -83,10 +89,40 @@ export default function FileUploader({
     inputRef.current?.click();
   };
 
-  const downloadTemplate = () => {
-    // In a real implementation, this would trigger a download of a template file
-    console.log('Downloading template');
-    // window.open('/api/admin/templates/questions-template.csv', '_blank');
+  const downloadTemplate = async (format: 'csv' | 'xlsx' | 'txt') => {
+    try {
+      setIsDownloading(true);
+      onError(null);
+      
+      // Fetch the template from the API
+      const response = await fetch(`/api/admin/templates/${format}`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to download template');
+      }
+      
+      // Get the blob from the response
+      const blob = await response.blob();
+      
+      // Create an object URL for the blob
+      const url = window.URL.createObjectURL(blob);
+      
+      // Create a temporary anchor element and trigger the download
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `questions-template.${format}`;
+      document.body.appendChild(a);
+      a.click();
+      
+      // Clean up
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Error downloading template:', error);
+      onError('Failed to download template. Please try again.');
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   return (
@@ -170,15 +206,34 @@ export default function FileUploader({
       <div className="border rounded-lg p-4">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-medium">File Format Requirements</h3>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="flex items-center"
-            onClick={downloadTemplate}
-          >
-            <Download className="h-4 w-4 mr-2" />
-            Download Template
-          </Button>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="flex items-center"
+                disabled={isDownloading}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                {isDownloading ? 'Downloading...' : 'Download Template'}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => downloadTemplate('csv')}>
+                <FileDown className="h-4 w-4 mr-2" />
+                CSV Template
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => downloadTemplate('xlsx')}>
+                <FileDown className="h-4 w-4 mr-2" />
+                Excel Template
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => downloadTemplate('txt')}>
+                <FileDown className="h-4 w-4 mr-2" />
+                Text Template
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         <div className="text-sm text-muted-foreground space-y-2">

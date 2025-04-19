@@ -98,8 +98,12 @@ export default function BulkUploadPage() {
       formData.append('aircraftId', selectedAircraft.id.toString());
       formData.append('testTypeId', selectedTestType.id.toString());
       formData.append('subjectId', selectedSubject.id.toString());
+      formData.append('title', `${selectedSubject.name} Test`);
+      if (selectedTestType.type.toLowerCase() === 'mock') {
+        formData.append('timeLimit', '60'); // Example: 60 minutes, adjust as needed
+      }
 
-      const response = await fetch('/api/admin/bulk-upload', {
+      const response = await fetch('/api/admin/tests/upload', {
         method: 'POST',
         body: formData,
       });
@@ -108,13 +112,13 @@ export default function BulkUploadPage() {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to upload questions');
       }
-
+      
       const data = await response.json();
       
-      // Set success summary
+      // Access data differently based on the new response format
       setUploadSummary({
-        questionsUploaded: data.questionsUploaded || 0,
-        errorsEncountered: data.errorsEncountered || 0,
+        questionsUploaded: data.data.questionsUploaded || 0,
+        errorsEncountered: 0, // The new API doesn't track errors the same way
         subjectName: selectedSubject.name,
         aircraftName: selectedAircraft.name,
         testTypeName: selectedTestType.type,

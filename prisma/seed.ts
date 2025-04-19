@@ -9,7 +9,7 @@ async function main() {
     const boeing737max = await prisma.aircraft.create({
       data: {
         name: 'Boeing 737 MAX',
-        type: 'Boeing',
+        slug: 'boeing-737-max',
       },
     });
   
@@ -19,6 +19,7 @@ async function main() {
   const mockTestType = await prisma.testType.create({
     data: {
       type: 'mock',
+      slug: 'mock',
     },
   });
   
@@ -28,6 +29,7 @@ async function main() {
   const practiceTestType = await prisma.testType.create({
     data: {
       type: 'practice',
+      slug: 'practice',
     },
   });
   
@@ -38,7 +40,8 @@ async function main() {
     // Create the "0 Limitations" title
     const limitationsTitle = await prisma.title.create({
       data: {
-        name: '0 Limitations',
+        name: 'Limitations',
+        slug: 'limitations',
         aircraftId: boeing737max.id,
         testTypeId: practiceTestType.id,
       },
@@ -49,7 +52,7 @@ async function main() {
     // Create the test
     const limitationsTest = await prisma.test.create({
       data: {
-        title: '0 Limitations Practice Test',
+        title: 'Limitations Practice Test',
         titleId: limitationsTitle.id,
         aircraftId: boeing737max.id,
         totalQuestions: 50,
