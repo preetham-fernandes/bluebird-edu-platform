@@ -4,6 +4,8 @@
 import { ReactNode, useState, useEffect } from 'react';
 import Header from '@/components/user/Header';
 import Sidebar from '@/components/user/Sidebar';
+import { useAuth } from "@/hooks/use-auth";
+import { Loader2 } from "lucide-react";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -12,6 +14,8 @@ interface DashboardLayoutProps {
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
+  // Check authentication
+  const { loading, authenticated } = useAuth({ required: true });
   
   // Handle responsive behavior
   useEffect(() => {
@@ -31,6 +35,15 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Show loading state while checking auth
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-background">

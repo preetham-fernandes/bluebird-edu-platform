@@ -25,6 +25,9 @@ model User {
   lastLogin         DateTime?
   timezone          String?             @default("UTC")
   deviceType        String?             // mobile, tablet, desktop
+
+  //admin
+    role      String    @default("user") // Options: "user", "admin"
   
   // NextAuth relations
   accounts          Account[]
