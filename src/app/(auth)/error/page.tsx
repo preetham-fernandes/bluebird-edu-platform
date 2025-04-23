@@ -12,8 +12,10 @@ export default function AuthErrorPage() {
 
   useEffect(() => {
     const errorParam = searchParams.get("error");
+    console.log("Auth error params:", Object.fromEntries(searchParams.entries()));
     
     if (errorParam) {
+      console.error("Auth error type:", errorParam);
       switch (errorParam) {
         case "OAuthSignin":
         case "OAuthCallback":

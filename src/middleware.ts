@@ -4,6 +4,16 @@ import { getToken } from "next-auth/jwt";
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // Skip middleware for API routes and auth callbacks
+  if (
+    pathname.startsWith('/api/') || 
+    pathname.startsWith('/_next/') ||
+    pathname.includes('/api/auth/callback/') ||
+    pathname.includes('/favicon.ico')
+  ) {
+    return NextResponse.next();
+  }
   
   // Get the token
   const token = await getToken({
@@ -49,18 +59,6 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
   
-  // Check if user profile is complete for authenticated users on dashboard routes
-  if (isAuthenticated && isDashboardRoute && 
-      pathname !== "/onboarding" && 
-      !pathname.startsWith("/api/")) {
-    // @ts-ignore: token has custom properties
-    const profileCompleted = token.profileCompleted;
-    
-    if (!profileCompleted) {
-      return NextResponse.redirect(new URL("/onboarding", request.url));
-    }
-  }
-  
   // For admin routes, check if the user has admin role
   if (isAuthenticated && isAdminRoute) {
     // @ts-ignore: token has custom properties
@@ -68,6 +66,16 @@ export async function middleware(request: NextRequest) {
     
     if (!isAdmin) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+  }
+  
+  // Check user role for dashboard routes
+  if (isAuthenticated && isDashboardRoute) {
+    // @ts-ignore: token has custom properties
+    const isAdmin = token.role === "admin";
+    
+    if (isAdmin) {
+      return NextResponse.redirect(new URL("/obm-admin/dashboard", request.url));
     }
   }
   
@@ -86,5 +94,7 @@ export const config = {
     "/onboarding",
     // Don't match API routes except those that need protection
     "/api/((?!auth).)*",
+    // Important: Exclude auth callback routes
+    "/((?!api/auth/callback|_next/static|_next/image|favicon.ico).+)",
   ],
 };

@@ -117,11 +117,34 @@ export async function POST(request: NextRequest) {
         { status: 404 }
       );
     }
+
+    // Generate a slug from the name
+    const slug = body.name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
+
+    // Check if a title with this slug already exists for this aircraft and test type
+    const existingTitle = await prisma.title.findFirst({
+      where: {
+        slug,
+        aircraftId,
+        testTypeId,
+      },
+    });
+
+    if (existingTitle) {
+      return NextResponse.json(
+        { error: 'A subject with this name already exists for this aircraft and test type' },
+        { status: 400 }
+      );
+    }
     
     // Create new subject (title)
     const subject = await prisma.title.create({
       data: {
         name: body.name,
+        slug,
         aircraftId,
         testTypeId,
       },

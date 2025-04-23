@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
       },
     });
     
-    // Return success
+    // Return success with complete user object including role
     return NextResponse.json({
       message: "Profile updated successfully",
       user: {
@@ -59,6 +59,7 @@ export async function POST(request: NextRequest) {
         email: updatedUser.email,
         username: updatedUser.username,
         profileCompleted: updatedUser.profileCompleted,
+        role: updatedUser.role || "user", // Include role in the response
       },
     });
   } catch (error) {
@@ -69,9 +70,6 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-
-// src/app/api/user/profile/route.ts
-// Add this GET method to your existing file
 
 export async function GET(request: NextRequest) {
   try {
@@ -96,6 +94,7 @@ export async function GET(request: NextRequest) {
         age: true,
         gender: true,
         profileCompleted: true,
+        role: true, // Include role in the selected fields
       },
     });
     

@@ -17,8 +17,7 @@ export const getAircraftById = async (id: number): Promise<Aircraft | null> => {
 
 export const createAircraft = async (data: { 
   name: string; 
-  type: string; 
-  isActive?: boolean 
+  slug: string;
 }): Promise<Aircraft> => {
   return prisma.aircraft.create({
     data
@@ -29,8 +28,7 @@ export const updateAircraft = async (
   id: number, 
   data: { 
     name?: string; 
-    type?: string; 
-    isActive?: boolean 
+    slug?: string;
   }
 ): Promise<Aircraft> => {
   return prisma.aircraft.update({
@@ -47,18 +45,7 @@ export const deleteAircraft = async (id: number): Promise<Aircraft> => {
 };
 
 export const getAircraftBySlug = async (slug: string): Promise<Aircraft | null> => {
-  // Convert slug to aircraft name (e.g., 'boeing-737-max' to 'Boeing 737 Max')
-  const nameFromSlug = slug
-    .split('-')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
-  
-  return prisma.aircraft.findFirst({
-    where: {
-      OR: [
-        { name: { contains: nameFromSlug} },
-        { name: { equals: nameFromSlug} }
-      ],
-    }
+  return prisma.aircraft.findUnique({
+    where: { slug }
   });
 };

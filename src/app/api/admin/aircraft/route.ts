@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Error fetching aircraft:', error);
     return NextResponse.json(
-      { error: 'An error occurred while fetching aircraft' },
+      { error: 'Failed to fetch aircraft' },
       { status: 500 }
     );
   }
@@ -38,27 +38,25 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    
-    // Validate required fields
-    if (!body.name || !body.type) {
+    const { name, slug } = body;
+
+    if (!name || !slug) {
       return NextResponse.json(
-        { error: 'Aircraft name and type are required' },
+        { error: 'Name and slug are required' },
         { status: 400 }
       );
     }
-    
-    // Create new aircraft
+
     const aircraft = await aircraftService.createAircraft({
-      name: body.name,
-      type: body.type,
-      isActive: body.isActive !== undefined ? body.isActive : true,
+      name,
+      slug
     });
-    
+
     return NextResponse.json(aircraft);
   } catch (error) {
     console.error('Error creating aircraft:', error);
     return NextResponse.json(
-      { error: 'An error occurred while creating the aircraft' },
+      { error: 'Failed to create aircraft' },
       { status: 500 }
     );
   }

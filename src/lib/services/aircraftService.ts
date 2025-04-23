@@ -1,6 +1,6 @@
 // src/lib/services/aircraftService.ts
-import * as aircraftRepository from '../db/repositories/aircraftRepository';
 import { Aircraft } from '@prisma/client';
+import * as aircraftRepository from '@/lib/db/repositories/aircraftRepository';
 
 // Get all active aircraft
 export const getAllAircraft = async (): Promise<Aircraft[]> => {
@@ -20,8 +20,7 @@ export const getAircraftBySlug = async (slug: string): Promise<Aircraft | null> 
 // Create a new aircraft
 export const createAircraft = async (data: { 
   name: string; 
-  type: string; 
-  isActive?: boolean 
+  slug: string;
 }): Promise<Aircraft> => {
   return aircraftRepository.createAircraft(data);
 };
@@ -31,8 +30,7 @@ export const updateAircraft = async (
   id: number, 
   data: { 
     name?: string; 
-    type?: string; 
-    isActive?: boolean 
+    slug?: string;
   }
 ): Promise<Aircraft> => {
   return aircraftRepository.updateAircraft(id, data);

@@ -27,7 +27,7 @@ import { Loader2, Plus, Plane, CheckCircle2 } from "lucide-react";
 interface Aircraft {
   id: number;
   name: string;
-  type: string;
+  slug: string;
 }
 
 interface AircraftSelectorProps {
@@ -45,7 +45,7 @@ export default function AircraftSelector({
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [newAircraftName, setNewAircraftName] = useState('');
-  const [newAircraftType, setNewAircraftType] = useState('');
+  const [newAircraftSlug, setNewAircraftSlug] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionSuccess, setSubmissionSuccess] = useState(false);
 
@@ -79,8 +79,8 @@ export default function AircraftSelector({
   };
 
   const handleAddAircraft = async () => {
-    if (!newAircraftName.trim() || !newAircraftType.trim()) {
-      onError('Aircraft name and type are required');
+    if (!newAircraftName.trim() || !newAircraftSlug.trim()) {
+      onError('Aircraft name and slug are required');
       return;
     }
 
@@ -95,7 +95,7 @@ export default function AircraftSelector({
         },
         body: JSON.stringify({
           name: newAircraftName,
-          type: newAircraftType,
+          slug: newAircraftSlug,
         }),
       });
       
@@ -119,7 +119,7 @@ export default function AircraftSelector({
         setDialogOpen(false);
         setSubmissionSuccess(false);
         setNewAircraftName('');
-        setNewAircraftType('');
+        setNewAircraftSlug('');
       }, 1500);
       
     } catch (err) {
@@ -134,7 +134,7 @@ export default function AircraftSelector({
     setDialogOpen(open);
     if (!open) {
       setNewAircraftName('');
-      setNewAircraftType('');
+      setNewAircraftSlug('');
       setSubmissionSuccess(false);
     }
   };
@@ -182,13 +182,16 @@ export default function AircraftSelector({
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="aircraft-type">Aircraft Type</Label>
+                    <Label htmlFor="aircraft-slug">Aircraft Slug</Label>
                     <Input 
-                      id="aircraft-type" 
-                      placeholder="e.g., Boeing"
-                      value={newAircraftType}
-                      onChange={(e) => setNewAircraftType(e.target.value)}
+                      id="aircraft-slug" 
+                      placeholder="e.g., boeing-737-max"
+                      value={newAircraftSlug}
+                      onChange={(e) => setNewAircraftSlug(e.target.value)}
                     />
+                    <p className="text-sm text-muted-foreground">
+                      The slug will be used in URLs. Use lowercase letters, numbers, and hyphens.
+                    </p>
                   </div>
                 </div>
                 <DialogFooter>
@@ -262,7 +265,7 @@ export default function AircraftSelector({
                 <div>
                   <div className="font-medium">{item.name}</div>
                   <div className="text-sm text-muted-foreground">
-                    Type: {item.type}
+                    Slug: {item.slug}
                   </div>
                 </div>
               </Label>

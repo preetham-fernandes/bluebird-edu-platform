@@ -16,7 +16,7 @@ export default function RegisterPage() {
       setError(null);
       
       if (data.provider === "google") {
-        await signIn("google", { callbackUrl: "/onboarding" });
+        await signIn("google", { callbackUrl: "/dashboard" });
         return;
       }
       
@@ -46,8 +46,8 @@ export default function RegisterPage() {
         password: data.password,
       });
 
-      // Redirect to onboarding
-      router.push("/onboarding");
+      // Redirect to dashboard
+      router.push("/dashboard");
     } catch (error) {
       setError("Something went wrong. Please try again.");
     }

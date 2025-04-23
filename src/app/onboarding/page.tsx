@@ -35,7 +35,7 @@ export default function OnboardingPage() {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
-    
+  
     try {
       // Validate input
       if (!username || !age || !gender) {
@@ -43,7 +43,7 @@ export default function OnboardingPage() {
         setIsLoading(false);
         return;
       }
-      
+  
       // Send data to the API
       const response = await fetch("/api/user/profile", {
         method: "POST",
@@ -56,17 +56,26 @@ export default function OnboardingPage() {
           gender,
         }),
       });
-      
+  
       if (!response.ok) {
         const data = await response.json();
         throw new Error(data.error || "Failed to update profile");
       }
-      
+  
       // Update the session
       await update();
-      
-      // Redirect to dashboard
-      router.push("/dashboard");
+  
+      // Get updated session data
+      const sessionRes = await fetch("/api/auth/session");
+      const sessionData = await sessionRes.json();
+  
+      // Redirect based on role
+      if (sessionData.user?.role === "admin") {
+        router.push("/obm-admin/dashboard");
+      } else {
+        router.push("/dashboard");
+      }
+  
     } catch (error) {
       console.error("Onboarding error:", error);
       setError(error instanceof Error ? error.message : "Something went wrong");

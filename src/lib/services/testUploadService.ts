@@ -46,8 +46,6 @@ export class TestUploadService {
             totalQuestions: uploadData.questions.length,
             timeLimit: uploadData.timeLimit,
             updatedBy: 1, // This should come from auth context in a real app
-            isActive: true,
-            lastUpdated: new Date(),
           },
         });
         
