@@ -27,9 +27,9 @@ export async function middleware(request: NextRequest) {
   // Define public routes that don't need authentication
   const publicRoutes = [
     "/",
-    "/auth/login",
-    "/auth/register",
-    "/auth/error",
+    "/login",
+    "/register",
+    "/error",
     "/api/auth"
   ];
   
@@ -48,13 +48,13 @@ export async function middleware(request: NextRequest) {
   
   // Redirect unauthenticated users to login for protected routes
   if (!isAuthenticated && (isDashboardRoute || isAdminRoute) && !isPublicRoute) {
-    return NextResponse.redirect(new URL("/auth/login", request.url));
+    return NextResponse.redirect(new URL("/login", request.url));
   }
   
   // Redirect authenticated users away from auth pages
   if (isAuthenticated && (
-    pathname === "/auth/login" || 
-    pathname === "/auth/register"
+    pathname === "/login" || 
+    pathname === "/register"
   )) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }

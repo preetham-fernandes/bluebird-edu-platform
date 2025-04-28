@@ -2,6 +2,7 @@
 "use client";
 
 import Link from 'next/link';
+import { signOut } from 'next-auth/react';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Button } from '@/components/ui/button';
 import {
@@ -53,9 +54,12 @@ export default function Header({ showMenuButton = false, onMenuClick }: HeaderPr
               <Link href="/dashboard/settings" className="flex w-full">Settings</Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive focus:text-destructive">
+            <DropdownMenuItem 
+              className="text-destructive focus:text-destructive cursor-pointer"
+              onSelect={() => signOut({ callbackUrl: "/" })}
+            >
               <LogOut className="mr-2 h-4 w-4" />
-              <Link href="/" className="flex w-full">Log out</Link>
+              <span>Log out</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

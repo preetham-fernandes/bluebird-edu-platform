@@ -9,6 +9,7 @@ declare module "next-auth" {
       image?: string;
       profileCompleted: boolean;
       role: string;
+      avatarChoice?: string | null;
     };
   }
 
@@ -19,6 +20,7 @@ declare module "next-auth" {
     image?: string;
     profileCompleted: boolean;
     role: string;
+    avatarChoice?: string | null;
   }
 }
 

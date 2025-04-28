@@ -1,6 +1,6 @@
 // src/app/api/admin/bulk-upload/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { parseExcelFile, parseCsvFile } from '@/lib/fileProcessing';
+import { parseTxtFile } from '@/lib/fileProcessing/textParser';
 import prisma from '@/lib/db/prisma';
 
 export async function POST(request: NextRequest) {
@@ -46,26 +46,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Process the file based on its type
+    // Process the file - only accept text files
     const fileBuffer = await file.arrayBuffer();
     const fileName = file.name.toLowerCase();
     
     let questions;
-    if (fileName.endsWith('.csv')) {
-      const csvText = new TextDecoder().decode(fileBuffer);
-      questions = await parseCsvFile(csvText);
-    } else if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls')) {
-      questions = await parseExcelFile(fileBuffer);
-    } else if (fileName.endsWith('.txt')) {
-      const txtText = new TextDecoder().decode(fileBuffer);
-      // Assume the text file is in CSV format
-      questions = await parseCsvFile(txtText);
-    } else {
+    if (!fileName.endsWith('.txt')) {
       return NextResponse.json(
-        { error: 'Unsupported file format' },
+        { error: 'Unsupported file format. Only .txt files are supported.' },
         { status: 400 }
       );
     }
+    
+    const txtText = new TextDecoder().decode(fileBuffer);
+    questions = await parseTxtFile(txtText);
 
     // First, deactivate any existing active tests for this title
     await prisma.test.updateMany({
@@ -110,7 +104,10 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      // Create options for this question
+      // Create options for this question - supporting both multiple choice and True/False
+      const isTrueFalseQuestion = question.options.length === 2;
+
+      // Create the available options
       for (const option of question.options) {
         await prisma.option.create({
           data: {
@@ -120,6 +117,22 @@ export async function POST(request: NextRequest) {
             isCorrect: option.id === question.correctAnswer,
           },
         });
+      }
+
+      // If it's a True/False question, we need to ensure database integrity by adding empty C and D options
+      if (isTrueFalseQuestion) {
+        const missingOptions = ['C', 'D'].filter(id => !question.options.some(o => o.id === id));
+        
+        for (const missingLabel of missingOptions) {
+          await prisma.option.create({
+            data: {
+              questionId: createdQuestion.id,
+              label: missingLabel,
+              optionText: '', // Empty text for missing options
+              isCorrect: false,
+            },
+          });
+        }
       }
     }
 

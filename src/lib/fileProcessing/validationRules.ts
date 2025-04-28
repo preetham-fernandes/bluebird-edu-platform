@@ -8,6 +8,7 @@ interface ValidationResult {
 
 /**
  * Validates question data against required rules
+ * Now supports True/False questions and questions without explanations
  */
 export function validateQuestionData(question: QuestionData): ValidationResult {
   const errors: string[] = [];
@@ -17,7 +18,13 @@ export function validateQuestionData(question: QuestionData): ValidationResult {
     errors.push('Question text is required');
   }
   
-  // Check options
+  // Check options - must have at least 2 options (for True/False)
+  if (question.options.length < 2) {
+    errors.push('Question must have at least 2 options (for True/False)');
+    return { valid: false, errors };
+  }
+  
+  // Check each option has content
   const emptyOptions = question.options.filter(opt => !opt.text || opt.text.trim() === '');
   if (emptyOptions.length > 0) {
     errors.push(`Option(s) ${emptyOptions.map(o => o.id).join(', ')} cannot be empty`);
@@ -27,36 +34,20 @@ export function validateQuestionData(question: QuestionData): ValidationResult {
   if (!question.correctAnswer || question.correctAnswer.trim() === '') {
     errors.push('Correct answer is required');
   } else {
-    // Validate that the correct answer is one of A, B, C, or D
-    const validAnswers = ['A', 'B', 'C', 'D'];
+    // Validate that the correct answer is one of the available options
+    const availableOptionIds = question.options.map(o => o.id);
     const normalizedAnswer = question.correctAnswer.trim().toUpperCase();
     
-    if (!validAnswers.includes(normalizedAnswer)) {
-      errors.push(`Correct answer must be one of: ${validAnswers.join(', ')}`);
+    if (!availableOptionIds.includes(normalizedAnswer)) {
+      errors.push(`Correct answer must be one of: ${availableOptionIds.join(', ')}`);
     } else {
       // Update to normalized form
       question.correctAnswer = normalizedAnswer;
     }
   }
   
-  // Check that options have the expected IDs
-  const validOptionIds = ['A', 'B', 'C', 'D'];
-  const optionIds = question.options.map(o => o.id);
-  
-  for (const id of validOptionIds) {
-    if (!optionIds.includes(id)) {
-      errors.push(`Missing option with ID ${id}`);
-    }
-  }
-  
-  // Check that there are exactly 4 options
-  if (question.options.length !== 4) {
-    errors.push(`Expected 4 options, but found ${question.options.length}`);
-  }
-  
   // Check that the correct answer corresponds to a valid option
-  if (question.correctAnswer && validOptionIds.includes(question.correctAnswer)) {
-    // Ensure the option actually has content
+  if (question.correctAnswer) {
     const correctOption = question.options.find(o => o.id === question.correctAnswer);
     if (!correctOption || !correctOption.text || correctOption.text.trim() === '') {
       errors.push(`Option ${question.correctAnswer} is marked as correct but has no content`);
@@ -100,11 +91,7 @@ export function validateQuestionSet(questions: QuestionData[]): ValidationResult
     errors.push('Question numbers should be sequential starting from 1');
   }
   
-  // Check that at least one question has an explanation
-  const hasExplanations = questions.some(q => q.explanation && q.explanation.trim() !== '');
-  if (!hasExplanations) {
-    errors.push('At least one question should have an explanation');
-  }
+  // No longer requiring explanations for any questions
   
   return {
     valid: errors.length === 0,

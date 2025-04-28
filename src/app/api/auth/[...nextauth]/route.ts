@@ -122,9 +122,9 @@ const authOptions: NextAuthOptions = {
       }),
   ],
   pages: {
-    signIn: "/auth/login",
-    signOut: "/auth/logout",
-    error: "/auth/error",
+    signIn: "/login",
+    signOut: "/logout",
+    error: "/error",
     // newUser: "/auth/register", // Commented out as it might cause issues
   },
   session: {
@@ -137,12 +137,13 @@ const authOptions: NextAuthOptions = {
         return true;
     },
     async session({ session, token }) {
-      console.log("Session callback:", { session, token });
+      // Assign the sub value from token to session.user.id
       if (token) {
-        session.user.id = token.sub!;
+        session.user.id = token.sub ?? token.id ?? ''; // Fallback to empty string if both are undefined
         session.user.role = token.role as string;
         session.user.profileCompleted = token.profileCompleted as boolean;
-        // Ensure the image field is properly populated in the session
+        
+        // Ensure image field is properly populated
         if (!session.user.image && token.picture) {
           session.user.image = token.picture as string;
         }
@@ -154,6 +155,7 @@ const authOptions: NextAuthOptions = {
 
       // Initial sign in
       if (user) {
+        token.id = user.id.toString();
         token.role = user.role || "user";
         token.profileCompleted = user.profileCompleted || false;
         // Store the profile image URL in the token

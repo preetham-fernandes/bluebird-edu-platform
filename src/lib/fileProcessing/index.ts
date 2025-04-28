@@ -1,16 +1,16 @@
 // src/lib/fileProcessing/index.ts
-import { parseCsvFile, parseExcelFile, parseTxtFile, QuestionData } from './textParser';
+import { parseTxtFile, QuestionData } from './textParser';
 import { validateQuestionSet, preprocessQuestionData } from './validationRules';
 
 /**
  * Processes an uploaded file and returns parsed question data
+ * Now only supports text files with CSV format
  */
 export async function processUploadedFile(
   file: File | Buffer | ArrayBuffer,
   fileName: string
 ): Promise<{ questions: QuestionData[]; errors: string[] }> {
   try {
-    let questions: QuestionData[] = [];
     let fileContent: ArrayBuffer;
     
     // Convert file to ArrayBuffer if it's a File
@@ -25,28 +25,16 @@ export async function processUploadedFile(
       fileContent = file;
     }
     
-    // Parse based on file extension
+    // Check if the file has a .txt extension
     const fileExt = fileName.split('.').pop()?.toLowerCase();
     
-    switch (fileExt) {
-      case 'csv':
-        const csvText = new TextDecoder().decode(fileContent);
-        questions = await parseCsvFile(csvText);
-        break;
-        
-      case 'xlsx':
-      case 'xls':
-        questions = await parseExcelFile(fileContent);
-        break;
-        
-      case 'txt':
-        const txtText = new TextDecoder().decode(fileContent);
-        questions = await parseTxtFile(txtText);
-        break;
-        
-      default:
-        throw new Error(`Unsupported file format: ${fileExt}`);
+    if (fileExt !== 'txt') {
+      throw new Error(`Unsupported file format: ${fileExt}. Only .txt files are supported.`);
     }
+    
+    // Parse the text file
+    const txtText = new TextDecoder().decode(fileContent);
+    let questions = await parseTxtFile(txtText);
     
     // Preprocess all questions
     questions = questions.map(preprocessQuestionData);
@@ -67,12 +55,8 @@ export async function processUploadedFile(
   }
 }
 
-export { parseCsvFile, parseExcelFile, parseTxtFile } from './textParser';
+// Export needed functions
+export { parseTxtFile } from './textParser';
 export type { QuestionData, QuestionOption } from './textParser';
 export { validateQuestionData, validateQuestionSet } from './validationRules';
-export { 
-  generateCsvTemplate, 
-  generateExcelTemplate, 
-  generateTxtTemplate,
-  handleTemplateDownload
-} from './templateGenerator';
+export { generateTxtTemplate, handleTemplateDownload } from './templateGenerator';

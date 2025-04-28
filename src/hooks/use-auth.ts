@@ -7,7 +7,7 @@ import { useEffect } from "react";
 
 export function useAuth({
   required = false,
-  redirectTo = "/auth/login",
+  redirectTo = "/login",
   queryParams = "",
 } = {}) {
   const { data: session, status } = useSession();

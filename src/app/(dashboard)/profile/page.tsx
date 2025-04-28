@@ -1,4 +1,4 @@
-// src/app/profile/page.tsx
+// src/app/(dashboard)/profile/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -16,9 +16,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import AvatarSelector from "@/components/community/AvatarSelector";
 
 export default function ProfilePage() {
   const { data: session, update } = useSession();
+  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,27 +33,37 @@ export default function ProfilePage() {
   );
   const [age, setAge] = useState<string>("");
   const [gender, setGender] = useState<string>("");
+  const [avatarChoice, setAvatarChoice] = useState<string | null>(null);
 
   // Load user data
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
+        setIsLoading(true);
         const response = await fetch("/api/user/profile");
         if (response.ok) {
           const data = await response.json();
           setUsername(data.user.username || username);
           setAge(data.user.age?.toString() || "");
           setGender(data.user.gender || "");
+          setAvatarChoice(data.user.avatarChoice || null);
         }
       } catch (error) {
         console.error("Error fetching profile:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to load your profile. Please try again.",
+        });
+      } finally {
+        setIsLoading(false);
       }
     };
 
     if (session?.user) {
       fetchUserProfile();
     }
-  }, [session, username]);
+  }, [session, username, toast]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,7 +99,13 @@ export default function ProfilePage() {
 
       // Update the session
       await update();
+      
       setSuccess(true);
+      
+      toast({
+        title: "Profile updated",
+        description: "Your profile has been updated successfully.",
+      });
     } catch (error) {
       console.error("Profile update error:", error);
       setError(
@@ -94,6 +114,12 @@ export default function ProfilePage() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleAvatarChange = (avatar: string) => {
+    setAvatarChoice(avatar);
+    // The avatar update is handled within the AvatarSelector component
+    // We just update local state here to reflect the change
   };
 
   if (!session) {
@@ -124,7 +150,7 @@ export default function ProfilePage() {
           </CardHeader>
 
           <form onSubmit={handleSubmit}>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6">
               {error && (
                 <Alert variant="destructive">
                   <AlertDescription>{error}</AlertDescription>
@@ -207,13 +233,25 @@ export default function ProfilePage() {
                   </div>
                 </RadioGroup>
               </div>
+
+              {/* Avatar Selector Section */}
+              <div className="space-y-2 pt-2 border-t">
+                <Label>Select Your Avatar</Label>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Choose an avatar to represent you in the community.
+                </p>
+                <AvatarSelector 
+                  currentAvatar={avatarChoice} 
+                  onAvatarChange={handleAvatarChange} 
+                />
+              </div>
             </CardContent>
 
             <CardFooter>
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? (
                   <div className="flex items-center gap-2">
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    <Loader2 className="h-4 w-4 animate-spin" />
                     <span>Saving...</span>
                   </div>
                 ) : (

@@ -37,6 +37,14 @@ model User {
   twoFactorAuth     TwoFactorAuth?
   otpVerifications  OTPVerification[]
   testAttempts      TestAttempt[]
+
+  // Add these new fields
+  avatarChoice      String? // Reference to selected avatar image
+  communityTermsAccepted Boolean @default(false)
+  
+  // Add these new relations
+  communityMessages  CommunityMessage[]
+  messageReports     MessageReport[]
 }
 
 // NextAuth.js required models
@@ -245,4 +253,37 @@ model TestChangeLog {
 
   @@index([testId])
   @@index([changedBy])
+}
+
+// Community Chat Models
+model CommunityMessage {
+  id          Int       @id @default(autoincrement())
+  content     String    @db.Text
+  userId      Int
+  user        User      @relation(fields: [userId], references: [id])
+  parentId    Int?
+  parentMessage CommunityMessage? @relation("Replies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies     CommunityMessage[] @relation("Replies")
+  isDeleted   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  reports     MessageReport[]
+
+  @@index([userId])
+  @@index([parentId])
+  @@index([createdAt])
+}
+
+model MessageReport {
+  id          Int       @id @default(autoincrement())
+  messageId   Int
+  message     CommunityMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  reporterId  Int
+  reporter    User      @relation(fields: [reporterId], references: [id])
+  reason      String?   @db.Text
+  status      String    @default("pending") // pending, reviewed, dismissed
+  createdAt   DateTime  @default(now())
+
+  @@index([messageId])
+  @@index([reporterId])
 }

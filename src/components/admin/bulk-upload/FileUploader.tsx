@@ -41,11 +41,10 @@ export default function FileUploader({
     setFileValidationErrors([]);
     onError(null);
 
-    // Check file type
-    const validTypes = ['.csv', '.xlsx', '.xls', '.txt'];
+    // Check file type - only accept .txt files
     const fileType = `.${file.name.split('.').pop()?.toLowerCase()}`;
-    if (!validTypes.includes(fileType)) {
-      errors.push(`Invalid file type. Please upload CSV, Excel, or TXT files.`);
+    if (fileType !== '.txt') {
+      errors.push(`Invalid file type. Please upload a TXT file.`);
     }
 
     // Check file size (10MB limit)
@@ -89,13 +88,13 @@ export default function FileUploader({
     inputRef.current?.click();
   };
 
-  const downloadTemplate = async (format: 'csv' | 'xlsx' | 'txt') => {
+  const downloadTemplate = async () => {
     try {
       setIsDownloading(true);
       onError(null);
       
-      // Fetch the template from the API
-      const response = await fetch(`/api/admin/templates/${format}`);
+      // Fetch the template from the API - only txt now
+      const response = await fetch(`/api/admin/templates/txt`);
       
       if (!response.ok) {
         throw new Error('Failed to download template');
@@ -110,7 +109,7 @@ export default function FileUploader({
       // Create a temporary anchor element and trigger the download
       const a = document.createElement('a');
       a.href = url;
-      a.download = `questions-template.${format}`;
+      a.download = `questions-template.txt`;
       document.body.appendChild(a);
       a.click();
       
@@ -130,7 +129,7 @@ export default function FileUploader({
       <div>
         <h2 className="text-lg font-semibold">Upload Questions File</h2>
         <p className="text-sm text-muted-foreground">
-          Upload a CSV, Excel, or TXT file containing your questions and answers
+          Upload a TXT file containing your questions in comma-separated values format
         </p>
       </div>
 
@@ -150,7 +149,7 @@ export default function FileUploader({
         <input
           ref={inputRef}
           type="file"
-          accept=".csv,.xlsx,.xls,.txt"
+          accept=".txt"
           onChange={handleChange}
           className="hidden"
         />
@@ -183,7 +182,7 @@ export default function FileUploader({
               Drag and drop your file or click to browse
             </h3>
             <p className="text-sm text-muted-foreground mb-4">
-              Upload CSV, Excel, or TXT file with questions (max 10MB)
+              Upload TXT file with comma-separated question data (max 10MB)
             </p>
             <Button variant="secondary" size="sm">
               Select File
@@ -207,50 +206,46 @@ export default function FileUploader({
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-medium">File Format Requirements</h3>
           
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="flex items-center"
-                disabled={isDownloading}
-              >
-                <Download className="h-4 w-4 mr-2" />
-                {isDownloading ? 'Downloading...' : 'Download Template'}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => downloadTemplate('csv')}>
-                <FileDown className="h-4 w-4 mr-2" />
-                CSV Template
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => downloadTemplate('xlsx')}>
-                <FileDown className="h-4 w-4 mr-2" />
-                Excel Template
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => downloadTemplate('txt')}>
-                <FileDown className="h-4 w-4 mr-2" />
-                Text Template
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="flex items-center"
+            disabled={isDownloading}
+            onClick={downloadTemplate}
+          >
+            <Download className="h-4 w-4 mr-2" />
+            {isDownloading ? 'Downloading...' : 'Download Template'}
+          </Button>
         </div>
 
         <div className="text-sm text-muted-foreground space-y-2">
-          <p>Your file should contain the following columns in this order:</p>
+          <p>Your text file should contain comma-separated values with the following columns in this order:</p>
           <ol className="list-decimal list-inside space-y-1 ml-1">
             <li>Question Number (numeric)</li>
             <li>Question Text (text)</li>
             <li>Option A (text)</li>
             <li>Option B (text)</li>
-            <li>Option C (text)</li>
-            <li>Option D (text)</li>
+            <li>Option C (text) - <span className="italic">leave empty for True/False questions</span></li>
+            <li>Option D (text) - <span className="italic">leave empty for True/False questions</span></li>
             <li>Correct Answer (A, B, C, or D)</li>
-            <li>Explanation (optional text)</li>
+            <li>Explanation (optional text) - <span className="italic">can be omitted</span></li>
           </ol>
-          <p className="mt-2">Example row:</p>
+          <p className="mt-2">Example formats:</p>
+          <pre className="bg-muted p-2 rounded-md text-xs overflow-x-auto mb-2">
+            <span className="font-semibold">Standard Question (with explanation):</span>
+            1,"What is the maximum operating altitude?","40,000 ft","41,000 ft","43,000 ft","39,000 ft",B,"The maximum operating altitude is 41,000 feet."
+          </pre>
+          <pre className="bg-muted p-2 rounded-md text-xs overflow-x-auto mb-2">
+            <span className="font-semibold">Standard Question (without explanation):</span>
+            2,"With flaps 40 selected, what is the speedbrake restriction?","Speedbrake can be used fully","Must not go beyond ARMED detent","May be used at pilot's discretion","Use only during descent",B
+          </pre>
+          <pre className="bg-muted p-2 rounded-md text-xs overflow-x-auto mb-2">
+            <span className="font-semibold">True/False Question (with explanation):</span>
+            3,"Intentional selection of reverse thrust in flight is prohibited.","True","False","","",A,"Selecting reverse thrust in flight is strictly prohibited."
+          </pre>
           <pre className="bg-muted p-2 rounded-md text-xs overflow-x-auto">
-            1,"What is the maximum cruise altitude?","35,000 ft","38,000 ft","41,000 ft","44,000 ft",C,"The maximum certified altitude is 41,000 ft."
+            <span className="font-semibold">True/False Question (without explanation):</span>
+            4,"The minimum fuel tank temperature prior to takeoff is –43°C.","True","False","","",A
           </pre>
         </div>
       </div>

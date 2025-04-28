@@ -1,9 +1,10 @@
-import React from 'react'
+// src/app/(dashboard)/community/page.tsx
+import MessageList from "@/components/community/MessageList";
 
-const page = () => {
+export default function CommunityPage() {
   return (
-    <div>Coming soon...</div>
-  )
+    <div className="container py-8 max-w-4xl mx-auto">
+      <MessageList />
+    </div>
+  );
 }
-
-export default page

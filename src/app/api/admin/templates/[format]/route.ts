@@ -9,23 +9,19 @@ export async function GET(
   try {
     const { format } = params;
     
-    // Validate the requested format
-    if (!['csv', 'xlsx', 'txt'].includes(format)) {
+    // Only support txt format now
+    if (format !== 'txt') {
       return NextResponse.json(
-        { error: 'Invalid template format requested' },
+        { error: 'Invalid template format requested. Only txt format is supported.' },
         { status: 400 }
       );
     }
     
     // Get the template data and metadata
-    const templateInfo = handleTemplateDownload(format as 'csv' | 'xlsx' | 'txt');
+    const templateInfo = handleTemplateDownload(format);
     
     // Create the response with appropriate headers
-    const response = new NextResponse(
-      format === 'xlsx' 
-        ? Buffer.from(templateInfo.data as ArrayBuffer)
-        : templateInfo.data as string
-    );
+    const response = new NextResponse(templateInfo.data as string);
     
     // Set headers
     response.headers.set('Content-Type', templateInfo.contentType);
