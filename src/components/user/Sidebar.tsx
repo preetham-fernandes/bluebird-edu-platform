@@ -6,14 +6,11 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { 
   Home, 
-  BookOpen,  
-  FileText, 
+  CreditCard,  
   Users, 
   User, 
   ChevronDown,
   ChevronRight,
-  Pen,
-  Plane,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
@@ -52,32 +49,15 @@ const navItems: NavItem[] = [
   //     },
   //   ],
   // },
-  // {
-  //   title: 'Boeing 737 MAX',
-  //   href: '/dashboard',
-  //   icon: <Plane className="h-5 w-5" />,
-  //   submenu: [
-  //     {
-  //       title: 'Study Test',
-  //       href: '/boeing-737-max/mock-test',
-  //       icon: <Pen className="h-4 w-4" />,
-  //     },
-  //     {
-  //       title: 'Practice Test',
-  //       href: '/boeing-737-max/practice-test',
-  //       icon: <BookOpen className="h-4 w-4" />,
-  //     },
-  //     {
-  //       title: 'Study Material',
-  //       href: '/boeing-737-max/study-material',
-  //       icon: <FileText className="h-4 w-4" />,
-  //     },
-  //   ],
-  // },
   {
     title: 'Community',
     href: '/community',
     icon: <Users className="h-5 w-5" />,
+  },
+  {
+    title: 'Subscriptions',
+    href: '/subscriptions',
+    icon: <CreditCard className="h-5 w-5" />,
   },
   {
     title: 'Profile',

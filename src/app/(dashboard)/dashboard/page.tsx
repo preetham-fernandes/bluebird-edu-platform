@@ -1,29 +1,14 @@
 // src/app/(dashboard)/dashboard/page.tsx
-import { 
-    Card, 
-    CardContent, 
-    CardDescription, 
-    CardHeader, 
-    CardTitle,
-    CardFooter
-  } from "@/components/ui/card";
-  import {
-    Tabs,
-    TabsContent,
-    TabsList,
-    TabsTrigger,
-  } from "@/components/ui/tabs";
-  import { Button } from "@/components/ui/button";
-  import { Progress } from "@/components/ui/progress";
+"use client"
+import { useSubscription } from '@/contexts/SubscriptionContext';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
   import { 
-    ArrowRight, 
     Book, 
     CheckCircle, 
     ClipboardList,
-    FileText, 
-    Timer, 
-    TrendingUp,
-    MessageSquare
+    TrendingUp, CreditCard, AlertCircle
   } from "lucide-react";
   import Link from "next/link";
   import { ReactNode } from "react";
@@ -60,15 +45,29 @@ import {
   }
 
   export default function DashboardPage() {
+    const { hasActiveSubscription, isLoading } = useSubscription();
+
     return (
       <div className="space-y-6">
         <div className="max-w-4xl">
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Welcome to Bluebird</h1>
           <p className="text-muted-foreground mt-2">
-            Strap in, run your checklist, and see what you're flying into. <br/>
-            Bluebird is here to help you stay ahead of the curve and stay in trim for the real deal.
+            Strap in, run your checklist, and see what you're flying into.
           </p>
         </div>
+
+        {!isLoading && !hasActiveSubscription && (
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            You currently have access to demo tests only. Subscribe to unlock all content.
+            <Button variant="link" className="p-0 h-auto" asChild>
+              <Link href="/subscriptions">View subscription options</Link>
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
           <DashboardCategoryCard
             title="Meteorology"
@@ -89,14 +88,14 @@ import {
             description="Boeing aircraft systems and procedures"
             details="Comprehensive training for Boeing aircraft types and variants."
             icon={<TrendingUp />}
-            href="/boeing-737-max/practice-test"
+            href="/boeing-737-max/test-type"
           />
           <DashboardCategoryCard
             title="Airbus"
             description="Airbus aircraft systems and procedures"
             details="In-depth coverage of Airbus aircraft operations and systems."
             icon={<CheckCircle />}
-            href="/airbus/practice-test"
+            href="/airbus-a320/test-type"
           />
         </div>
       </div>

@@ -75,7 +75,7 @@ export default function RegisterPage() {
 
         <p className="px-8 text-center text-sm text-muted-foreground">
           <Link
-            href="/auth/login"
+            href="/login"
             className="hover:text-brand underline underline-offset-4"
           >
             Already have an account? Sign In

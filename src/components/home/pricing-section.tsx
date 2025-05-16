@@ -1,3 +1,5 @@
+"use client"
+
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { CheckCircle2 } from "lucide-react"
@@ -25,32 +27,34 @@ function PricingPlan({
   href,
 }: PricingPlanProps) {
   return (
-    <Card className={`flex flex-col ${highlighted ? "border-primary" : ""}`}>
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-        <CardDescription>{description}</CardDescription>
-        <div className="mt-4 text-4xl font-bold">{price}</div>
-      </CardHeader>
-      <CardContent className="flex-1">
-        <ul className="grid gap-2">
-          {features.map((feature, index) => (
-            <li key={index} className="flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-primary" />
-              <span>{feature}</span>
-            </li>
-          ))}
-        </ul>
-      </CardContent>
-      <CardFooter className="pt-0 mt-auto">
-        <Button
-          className={`w-full ${highlighted ? "bg-primary hover:bg-primary/90" : ""}`}
-          variant={buttonVariant}
-          asChild
-        >
-          <Link href={href}>{buttonText}</Link>
-        </Button>
-      </CardFooter>
-    </Card>
+    <div>
+      <Card className={`flex flex-col h-full ${highlighted ? "border-foreground shadow-lg" : ""}`}>
+        <CardHeader>
+          <CardTitle>{title}</CardTitle>
+          <CardDescription>{description}</CardDescription>
+          <div className="mt-4 text-4xl font-bold">{price}</div>
+        </CardHeader>
+        <CardContent className="flex-1">
+          <ul className="grid gap-2">
+            {features.map((feature, idx) => (
+              <li key={idx} className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4" /> {/* Removed text-primary */}
+                <span>{feature}</span>
+              </li>
+            ))}
+          </ul>
+        </CardContent>
+        <CardFooter className="pt-0 mt-auto">
+          <Button
+            className={`w-full ${highlighted ? "bg-foreground text-background hover:bg-foreground/90" : ""}`}
+            variant={buttonVariant}
+            asChild
+          >
+            <Link href={href}>{buttonText}</Link>
+          </Button>
+        </CardFooter>
+      </Card>
+    </div>
   )
 }
 
@@ -69,7 +73,7 @@ export function PricingSection() {
     {
       title: "Full Access",
       description: "Complete access to one aircraft",
-      price: "₹XX.XX",
+      price: "₹5,999",
       features: [
         "Full question bank for one aircraft",
         "Unlimited practice questions",
@@ -78,13 +82,13 @@ export function PricingSection() {
       ],
       buttonText: "Subscribe Now",
       buttonVariant: "default" as const,
-      highlighted: true,
+      highlighted: false, // Made this highlighted
       href: "/register",
     },
     {
       title: "Test Series",
       description: "Individual test packages",
-      price: "₹XX.XX",
+      price: "₹2,999",
       features: [
         "Individual test series purchase",
         "Specific aircraft focus",
@@ -92,7 +96,7 @@ export function PricingSection() {
         "Performance comparison",
       ],
       buttonText: "Buy Test Series",
-      buttonVariant: "outline" as const,
+      buttonVariant: "default" as const,
       highlighted: false,
       href: "/register",
     },
@@ -100,11 +104,11 @@ export function PricingSection() {
 
   return (
     <section className="w-full py-12 md:py-24 lg:py-32" id="pricing">
-      <div className="container px-4 md:px-6">
+      <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
         <div className="flex flex-col items-center justify-center space-y-4 text-center">
           <div className="space-y-2">
-            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Pricing Plans</h2>
-            <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-black">Pricing Plans</h2>
+            <p className="max-w-[900px]  md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed text-black">
               Flexible options to suit your preparation needs
             </p>
           </div>
@@ -128,4 +132,3 @@ export function PricingSection() {
     </section>
   )
 }
-

@@ -6,6 +6,7 @@ import Header from '@/components/user/Header';
 import Sidebar from '@/components/user/Sidebar';
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
+import { SubscriptionProvider } from '@/contexts/SubscriptionContext';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -73,12 +74,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </div>
         
         {/* Main content */}
+        <SubscriptionProvider>
         <main className={`
           flex-1 p-4 md:p-6 overflow-y-auto
           ${isMobile ? 'w-full' : sidebarOpen ? '' : 'ml-0'}
         `}>
           {children}
         </main>
+        </SubscriptionProvider>
       </div>
     </div>
   );

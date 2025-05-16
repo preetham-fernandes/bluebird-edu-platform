@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { 
   Home, 
-  ClipboardList,  
+  CreditCard,  
   Users, 
   User, 
   Settings,
@@ -53,28 +53,6 @@ const navItems: NavItem[] = [
   //     },
   //   ],
   // },
-  // {
-  //   title: 'Boeing 737 MAX',
-  //   href: '/obm-admin/boeing-737-max',
-  //   icon: <ClipboardList className="h-5 w-5" />,
-  //   submenu: [
-  //     {
-  //       title: 'Study Test',
-  //       href: '/obm-admin/boeing-737-max/mock-test',
-  //       icon: <ChevronRight className="h-4 w-4" />,
-  //     },
-  //     {
-  //       title: 'Practice Exam',
-  //       href: '/obm-admin/boeing-737-max/practice-test',
-  //       icon: <ChevronRight className="h-4 w-4" />,
-  //     },
-  //     {
-  //       title: 'Study Material',
-  //       href: '/obm-admin/boeing-737-max/study-material',
-  //       icon: <ChevronRight className="h-4 w-4" />,
-  //     },
-  //   ],
-  // },
   {
     title: 'Content Management',
     href: '/obm-admin/content-management',
@@ -94,6 +72,11 @@ const navItems: NavItem[] = [
     title: 'Community Management',
     href: '/obm-admin/community-management',
     icon: <Users className="h-5 w-5" />,
+  },
+  {
+    title: 'Subscription Plans',
+    href: '/obm-admin/subscription-plans',
+    icon: <CreditCard className="h-5 w-5" />,
   },
   {
     title: 'Settings',

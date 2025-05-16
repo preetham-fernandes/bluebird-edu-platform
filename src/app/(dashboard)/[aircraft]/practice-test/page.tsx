@@ -50,41 +50,15 @@ export default function PracticeTestSubjectsPage() {
       try {
         setLoading(true);
         
-        // In a real app, we would fetch this from the API
-        // For now, let's simulate an API call with our test data
+        // Fetch subjects from the API
+        const response = await fetch(`/api/titles?aircraft=${formatParam(aircraft)}&testType=practice`);
         
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        if (formatParam(aircraft) === 'boeing-737-max') {
-          // Hard-coded subjects for Boeing 737 MAX
-          // In a real app, you would fetch titles from the database
-          setSubjects([
-            {
-              id: 1,
-              name: '0 Limitations',
-              testCount: 1
-            },
-            {
-              id: 2,
-              name: 'Systems',
-              testCount: 0
-            },
-            {
-              id: 3,
-              name: 'Procedures',
-              testCount: 0
-            },
-            {
-              id: 4,
-              name: 'Performance',
-              testCount: 0
-            }
-          ]);
-        } else {
-          // For other aircraft, show empty results
-          setSubjects([]);
+        if (!response.ok) {
+          throw new Error('Failed to fetch subjects');
         }
+        
+        const data = await response.json();
+        setSubjects(data);
       } catch (err) {
         console.error('Error fetching subjects:', err);
         setError('Failed to load subjects. Please try again later.');
@@ -97,7 +71,7 @@ export default function PracticeTestSubjectsPage() {
   }, [aircraft]);
   
   const goBack = () => {
-    router.push('/dashboard');
+    router.push(`/dashboard`);
   };
   
   if (loading) {

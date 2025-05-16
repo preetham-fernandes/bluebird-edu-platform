@@ -25,6 +25,8 @@ export interface TestOption {
     totalQuestions: number;
     timeLimit: number | null;
     questions: TestQuestion[];
+    // Optional type field for differentiating mock vs practice
+    type?: 'mock' | 'practice';
   }
   
   // Test attempt types
@@ -41,6 +43,7 @@ export interface TestOption {
     responses: QuestionResponse[];
     score: number;
     timeTaken?: number | null;
+    testType?: 'mock' | 'practice';
   }
   
   export interface TestAttemptResponse {

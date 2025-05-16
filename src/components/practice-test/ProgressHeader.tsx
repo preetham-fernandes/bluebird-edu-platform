@@ -31,16 +31,8 @@ export default function ProgressHeader({
   const progressPercentage = (answeredQuestions / totalQuestions) * 100;
   
   return (
-    <div className="mb-6 space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex flex-col">
-          <h3 className="text-md font-medium">
-            Page {currentPage} of {totalPages}
-          </h3>
-          <span className="text-sm text-muted-foreground">
-            {answeredQuestions} of {totalQuestions} questions answered
-          </span>
-        </div>
+    <div className="mb-2 space-y-3">
+      <div className="flex items-center justify-end">
         <div className="flex items-center space-x-2">
           <Button
             variant="outline"
@@ -75,11 +67,10 @@ export default function ProgressHeader({
       </div>
       
       <div className="space-y-1">
-        <div className="flex items-center justify-between text-sm">
-          <span>Progress</span>
-          <span>{Math.round(progressPercentage)}%</span>
+        <div className="flex items-center space-x-2">
+          <Progress value={progressPercentage} className="h-3 flex-1" />
+          <span className="text-sm w-10 text-right">{answeredQuestions}/{totalQuestions}</span>
         </div>
-        <Progress value={progressPercentage} className="h-2" />
       </div>
     </div>
   );

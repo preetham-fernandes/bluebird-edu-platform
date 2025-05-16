@@ -2,12 +2,26 @@
 import prisma from '../prisma';
 
 // Get test by ID with all questions and options
-export const getTestById = async (id: number) => {
+export const getTestById = async (id: number, testType?: string) => {
   return prisma.test.findUnique({
-    where: { id },
+    where: { 
+      id,
+      // Add this condition if testType is provided
+      ...(testType ? {
+        titleRef: {
+          testType: {
+            type: testType
+          }
+        }
+      } : {})
+    },
     include: {
       aircraft: true,
-      titleRef: true,
+      titleRef: {
+        include: {
+          testType: true,
+        }
+      },
       questions: {
         orderBy: {
           questionNumber: 'asc',
@@ -32,10 +46,35 @@ export const getTestsByAircraftId = async (aircraftId: number) => {
       isActive: true 
     },
     include: {
-      titleRef: true,
+      titleRef: {
+        include: {
+          testType: true,
+        },
+      },
     },
     orderBy: {
       title: 'asc',
+    },
+  });
+};
+
+// Get tests by test type and title
+export const getTestsByTypeAndTitle = async (testTypeId: number, titleId: number) => {
+  return prisma.test.findMany({
+    where: { 
+      titleRef: {
+        id: titleId,
+        testTypeId: testTypeId,
+      },
+      isActive: true 
+    },
+    include: {
+      aircraft: true,
+      titleRef: {
+        include: {
+          testType: true,
+        },
+      },
     },
   });
 };
@@ -85,6 +124,73 @@ export const getTestByTitleAndAircraft = async (titleName: string, aircraftSlug:
     include: {
       aircraft: true,
       titleRef: true,
+      questions: {
+        orderBy: {
+          questionNumber: 'asc',
+        },
+        include: {
+          options: {
+            orderBy: {
+              label: 'asc',
+            },
+          },
+        },
+      },
+    },
+  });
+};
+
+export const getMockTestById = async (id: number) => {
+  return prisma.test.findFirst({
+    where: { 
+      id,
+      titleRef: {
+        testType: {
+          type: 'mock'
+        }
+      }
+    },
+    include: {
+      aircraft: true,
+      titleRef: {
+        include: {
+          testType: true,
+        }
+      },
+      questions: {
+        orderBy: {
+          questionNumber: 'asc',
+        },
+        include: {
+          options: {
+            orderBy: {
+              label: 'asc',
+            },
+          },
+        },
+      },
+    },
+  });
+};
+
+// Create a specific method for practice tests
+export const getPracticeTestById = async (id: number) => {
+  return prisma.test.findFirst({
+    where: { 
+      id,
+      titleRef: {
+        testType: {
+          type: 'practice'
+        }
+      }
+    },
+    include: {
+      aircraft: true,
+      titleRef: {
+        include: {
+          testType: true,
+        }
+      },
       questions: {
         orderBy: {
           questionNumber: 'asc',

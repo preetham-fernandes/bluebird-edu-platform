@@ -130,24 +130,22 @@ export default function Message({
       }`}
     >
       <div className="flex gap-3">
-        <Image
-          src={avatarSrc}
-          width={40}
-          height={40}
-          alt={`${user.name}'s avatar`}
-          className="rounded-full"
-        />
+        <div className="relative w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+          <Image
+            src={avatarSrc}
+            alt={`${user.name}'s avatar`}
+            fill
+            className="object-cover"
+            quality={90}
+            loading="lazy"
+          />
+        </div>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between">
             <div>
               <p className="font-semibold">
-                {user.name}
-                {user.username && (
-                  <span className="text-muted-foreground font-normal ml-1">
-                    @{user.username}
-                  </span>
-                )}
+                {user.username && user.username.trim() !== "" ? user.username : user.name}
               </p>
               <p className="text-xs text-muted-foreground">
                 {formattedCreatedAt}

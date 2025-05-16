@@ -25,6 +25,7 @@ model User {
   lastLogin         DateTime?
   timezone          String?             @default("UTC")
   deviceType        String?             // mobile, tablet, desktop
+  userSubscriptions UserSubscription[]
 
   //admin
     role      String    @default("user") // Options: "user", "admin"
@@ -286,4 +287,42 @@ model MessageReport {
 
   @@index([messageId])
   @@index([reporterId])
+}
+
+// Defines available subscription plans
+model SubscriptionPlan {
+  id           Int               @id @default(autoincrement())
+  name         String            // Internal name (e.g., "boeing-737-max")
+  displayName  String            // User-facing name (e.g., "Boeing 737 MAX Complete Course")
+  description  String?           // Detailed description
+  moduleType   String            // "aircraft" or "subject"
+  moduleId     Int               // Reference to the corresponding module
+  priceMonthly Decimal           @db.Decimal(10, 2)
+  priceYearly  Decimal           @db.Decimal(10, 2)
+  isActive     Boolean           @default(true)
+  features     Json?             // Array of included features
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  userSubscriptions UserSubscription[]
+}
+
+// Tracks user subscriptions
+model UserSubscription {
+  id                Int             @id @default(autoincrement())
+  userId            Int
+  user              User            @relation(fields: [userId], references: [id])
+  planId            Int
+  plan              SubscriptionPlan @relation(fields: [planId], references: [id])
+  startDate         DateTime        @default(now())
+  endDate           DateTime
+  status            String          // "active", "cancelled", "expired"
+  paymentReference  String?         // For Razorpay reference
+  lastBillingDate   DateTime?
+  nextBillingDate   DateTime?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  
+  @@index([userId])
+  @@index([status])
+  @@index([endDate])
 }

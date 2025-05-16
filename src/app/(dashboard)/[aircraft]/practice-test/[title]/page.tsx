@@ -1,3 +1,4 @@
+//src/app/(dashboard)/[aircraft]/practice-test/[title]/page.tsx
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -47,40 +48,36 @@ export default function PracticeTestListPage() {
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
   
-  useEffect(() => {
-    const fetchTests = async () => {
-      try {
-        setLoading(true);
-        
-        // In a real app, you'd fetch tests for this specific title and aircraft
-        // We'll mock a single test for the Boeing 737 MAX Limitations
-        // This should match what we seeded earlier
-        if (
-          formatParam(aircraft) === 'boeing-737-max' && 
-          formatParam(title).toLowerCase() === '0-limitations'
-        ) {
-          // Hardcoded for now, we know this is our test with ID 1
-          setTests([{
-            id: 1,
-            title: '0 Limitations Practice Test',
-            subject: '0 Limitations',
-            totalQuestions: 50,
-            timeLimit: null
-          }]);
-        } else {
-          // For other combinations, show empty results
-          setTests([]);
+    useEffect(() => {
+      const fetchTests = async () => {
+        try {
+          setLoading(true);
+          console.log('Fetching tests for:', formatParam(aircraft), formatParam(title));
+          
+          // Use your existing tests endpoint
+          const testsResponse = await fetch(
+            `/api/tests?aircraft=${formatParam(aircraft)}&title=${formatParam(title)}&testType=practice`
+          );
+          
+          if (!testsResponse.ok) {
+            throw new Error('Failed to fetch tests');
+          }
+          
+          const testsData = await testsResponse.json();
+          console.log('Tests data:', testsData);
+          
+          // Set tests directly, as the response is already properly formatted
+          setTests(testsData);
+        } catch (err) {
+          console.error('Error fetching tests:', err);
+          setError('Failed to load tests. Please try again later.');
+        } finally {
+          setLoading(false);
         }
-      } catch (err) {
-        console.error('Error fetching tests:', err);
-        setError('Failed to load tests. Please try again later.');
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchTests();
-  }, [aircraft, title]);
+      };
+      
+      fetchTests();
+    }, [aircraft, title]);
   
   const startTest = (testId: number) => {
     router.push(`/${formatParam(aircraft)}/practice-test/${formatParam(title)}/${testId}`);

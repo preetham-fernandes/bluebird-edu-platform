@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     
     // Extract test attempt data from request body
-    const { userId, testId, responses, score } = body;
+    const { userId, testId, responses, score, timeTaken, testType } = body;
     
     if (!userId || !testId || !responses || score === undefined) {
       return NextResponse.json(
@@ -23,7 +23,8 @@ export async function POST(request: NextRequest) {
       testId,
       responses,
       score,
-      // Note: We're not including timeTaken since it's not required
+      timeTaken, // Include time taken for mock tests
+      testType: testType || 'practice' // Default to practice if not specified
     });
     
     return NextResponse.json(testAttempt);
@@ -42,6 +43,7 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const userId = searchParams.get('userId');
     const testId = searchParams.get('testId');
+    const testType = searchParams.get('testType'); // Added to filter by test type
     
     if (!userId) {
       return NextResponse.json(
@@ -65,10 +67,11 @@ export async function GET(request: NextRequest) {
       }
     }
     
-    // Get test attempts by userId and optional testId
+    // Get test attempts by userId, optional testId, and optional testType
     const testAttempts = await testAttemptService.getTestAttemptsByUser(
       userIdNum,
-      testIdNum
+      testIdNum,
+      testType as 'mock' | 'practice' | undefined
     );
     
     return NextResponse.json(testAttempts);
