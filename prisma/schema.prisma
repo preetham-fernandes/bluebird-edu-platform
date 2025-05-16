@@ -256,7 +256,6 @@ model TestChangeLog {
   @@index([changedBy])
 }
 
-// Community Chat Models
 model CommunityMessage {
   id          Int       @id @default(autoincrement())
   content     String    @db.Text
@@ -265,6 +264,13 @@ model CommunityMessage {
   parentId    Int?
   parentMessage CommunityMessage? @relation("Replies", fields: [parentId], references: [id], onDelete: Cascade)
   replies     CommunityMessage[] @relation("Replies")
+  
+  // New fields for organization
+  moduleId    Int?
+  subjectId   Int?
+  title       String?
+  isThread    Boolean   @default(false) // true for main threads, false for replies
+  
   isDeleted   Boolean   @default(false)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -273,6 +279,9 @@ model CommunityMessage {
   @@index([userId])
   @@index([parentId])
   @@index([createdAt])
+  @@index([moduleId])
+  @@index([subjectId])
+  @@index([isThread])
 }
 
 model MessageReport {
