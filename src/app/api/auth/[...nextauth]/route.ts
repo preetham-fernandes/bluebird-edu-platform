@@ -52,7 +52,7 @@ const customAdapter = {
 };
 
 const authOptions: NextAuthOptions = {
-  debug: true,
+  debug: true, // Set to false in production
   adapter: customAdapter as any,
   providers: [
     GoogleProvider({

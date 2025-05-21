@@ -1,4 +1,6 @@
 // src/middleware.ts
+// This middleware should be added to your project to ensure proper session handling
+
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 
@@ -41,42 +43,16 @@ export async function middleware(request: NextRequest) {
     pathname.includes("/favicon.ico")
   );
   
-  // Protected routes: dashboard and admin
-  const isDashboardRoute = pathname.startsWith("/(dashboard)") || 
-                          pathname.startsWith("/dashboard");
-  const isAdminRoute = pathname.startsWith("/obm-admin");
+  // Protected routes: API routes for community actions
+  const isCommunityApiRoute = pathname.startsWith("/api/community/") && 
+    (pathname.includes("/threads") || pathname.includes("/messages"));
   
-  // Redirect unauthenticated users to login for protected routes
-  if (!isAuthenticated && (isDashboardRoute || isAdminRoute) && !isPublicRoute) {
-    return NextResponse.redirect(new URL("/login", request.url));
-  }
-  
-  // Redirect authenticated users away from auth pages
-  if (isAuthenticated && (
-    pathname === "/login" || 
-    pathname === "/register"
-  )) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
-  }
-  
-  // For admin routes, check if the user has admin role
-  if (isAuthenticated && isAdminRoute) {
-    // @ts-ignore: token has custom properties
-    const isAdmin = token.role === "admin";
-    
-    if (!isAdmin) {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
-    }
-  }
-  
-  // Check user role for dashboard routes
-  if (isAuthenticated && isDashboardRoute) {
-    // @ts-ignore: token has custom properties
-    const isAdmin = token.role === "admin";
-    
-    if (isAdmin) {
-      return NextResponse.redirect(new URL("/obm-admin/dashboard", request.url));
-    }
+  // If it's a community API route and the user is not authenticated, return 401
+  if (isCommunityApiRoute && !isAuthenticated) {
+    return NextResponse.json(
+      { error: "You must be signed in to perform this action" },
+      { status: 401 }
+    );
   }
   
   return NextResponse.next();
@@ -84,17 +60,16 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Match dashboard and admin routes
-    "/(dashboard)/:path*",
+    // Match dashboard and user routes
     "/dashboard/:path*",
-    "/obm-admin/:path*",
+    "/profile/:path*",
+    "/community/:path*",
+    // Match protected API routes
+    "/api/community/:path*",
     // Match auth routes
-    "/auth/:path*",
-    // Match onboarding
-    "/onboarding",
-    // Don't match API routes except those that need protection
-    "/api/((?!auth).)*",
-    // Important: Exclude auth callback routes
-    "/((?!api/auth/callback|_next/static|_next/image|favicon.ico).+)",
+    "/login",
+    "/register",
+    // Don't match other API routes or assets
+    "/((?!api|_next/static|_next/image|favicon.ico).*)",
   ],
 };

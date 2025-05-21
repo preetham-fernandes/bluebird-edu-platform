@@ -216,7 +216,7 @@ export default function SubscriptionsPage() {
                   <Card key={subscription.id} className={!isActive ? "opacity-70" : undefined}>
                     <CardHeader>
                       <div className="flex items-center justify-between">
-                        <CardTitle>{subscription.plan.displayName}</CardTitle>
+                        <CardTitle>{subscription.plan ? subscription.plan.displayName : 'No Plan'}</CardTitle>
                         {isActive ? (
                           <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
                             Active
@@ -228,7 +228,7 @@ export default function SubscriptionsPage() {
                         )}
                       </div>
                       <CardDescription>
-                        {subscription.plan.moduleType === 'aircraft' ? 'Aircraft' : 'Subject'} Plan
+                        {subscription.plan ? (subscription.plan.moduleType === 'aircraft' ? 'Aircraft' : 'Subject') : 'No Plan'} Plan
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-2">

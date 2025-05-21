@@ -3,6 +3,8 @@
 
 generator client {
   provider = "prisma-client-js"
+  output   = "./node_modules/@prisma/client"
+
 }
 
 datasource db {
@@ -28,7 +30,7 @@ model User {
   userSubscriptions UserSubscription[]
 
   //admin
-    role      String    @default("user") // Options: "user", "admin"
+  role      String    @default("user") // Options: "user", "admin"
   
   // NextAuth relations
   accounts          Account[]
@@ -44,7 +46,9 @@ model User {
   communityTermsAccepted Boolean @default(false)
   
   // Add these new relations
+  communityThreads   CommunityThread[]
   communityMessages  CommunityMessage[]
+  messageUpvotes     MessageUpvote[]
   messageReports     MessageReport[]
 }
 
@@ -257,36 +261,73 @@ model TestChangeLog {
 }
 
 // Community Chat Models
-model CommunityMessage {
-  id          Int       @id @default(autoincrement())
-  content     String    @db.Text
+model CommunityThread {
+  id          Int                 @id @default(autoincrement())
+  title       String
+  content     String              @db.Text
   userId      Int
-  user        User      @relation(fields: [userId], references: [id])
-  parentId    Int?
-  parentMessage CommunityMessage? @relation("Replies", fields: [parentId], references: [id], onDelete: Cascade)
-  replies     CommunityMessage[] @relation("Replies")
-  isDeleted   Boolean   @default(false)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  reports     MessageReport[]
+  user        User                @relation(fields: [userId], references: [id])
+  isDeleted   Boolean             @default(false)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  replyCount  Int                 @default(0)
+  replies     CommunityMessage[]
 
   @@index([userId])
-  @@index([parentId])
   @@index([createdAt])
 }
 
-model MessageReport {
-  id          Int       @id @default(autoincrement())
+model CommunityMessage {
+  id            Int                 @id @default(autoincrement())
+  content       String              @db.Text
+  userId        Int
+  user          User                @relation(fields: [userId], references: [id])
+  threadId      Int?
+  thread        CommunityThread?    @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  parentId      Int?
+  parentMessage CommunityMessage?   @relation("Replies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies       CommunityMessage[]  @relation("Replies")
+  isDeleted     Boolean             @default(false)
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  upvoteCount   Int                 @default(0)
+  upvotes       MessageUpvote[]
+  reports       MessageReport[]
+
+  @@index([threadId])
+  @@index([parentId])
+  @@index([createdAt])
+  @@index([userId])
+}
+
+model MessageUpvote {
+  id          Int               @id @default(autoincrement())
   messageId   Int
-  message     CommunityMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  message     CommunityMessage  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  userId      Int
+  user        User              @relation(fields: [userId], references: [id])
+  createdAt   DateTime          @default(now())
+
+  @@unique([messageId, userId]) // Prevent duplicate votes
+  @@index([userId])
+}
+
+model MessageReport {
+  id          Int               @id @default(autoincrement())
+  messageId   Int
+  message     CommunityMessage  @relation(fields: [messageId], references: [id], onDelete: Cascade)
   reporterId  Int
-  reporter    User      @relation(fields: [reporterId], references: [id])
-  reason      String?   @db.Text
-  status      String    @default("pending") // pending, reviewed, dismissed
-  createdAt   DateTime  @default(now())
+  reporter    User              @relation(fields: [reporterId], references: [id])
+  reason      String            // Report category
+  details     String?           @db.Text // Optional additional details
+  status      String            @default("pending") // pending, reviewed, dismissed, actioned
+  resolution  String?           // Action taken if any
+  createdAt   DateTime          @default(now())
+  resolvedAt  DateTime?         // When the report was handled
 
   @@index([messageId])
   @@index([reporterId])
+  @@index([status])
 }
 
 // Defines available subscription plans
