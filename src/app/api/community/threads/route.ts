@@ -1,22 +1,21 @@
 // src/app/api/community/threads/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
+import { getAuthenticatedUserId } from '@/lib/auth/session-helper';
 import * as threadService from '@/lib/services/community/threadService';
 
 // POST - Create a new thread
 export async function POST(request: NextRequest) {
   try {
-    // Get the session without passing authOptions
-    const session = await getServerSession();
+    // Get authenticated user ID
+    const { userId, error } = await getAuthenticatedUserId(request);
     
-    // Debug the session to see what we're getting
-    console.log("Thread creation session:", session);
-    
-    // Check if user is authenticated
-    if (!session?.user?.id) {
-      console.log("Auth failed for thread creation, session:", session);
+    // Return error if authentication failed
+    if (error) return error;
+
+    // Check if userId is defined
+    if (userId === undefined) {
       return NextResponse.json(
-        { error: 'You must be signed in to create threads' },
+        { error: 'User ID is required' },
         { status: 401 }
       );
     }
@@ -31,7 +30,7 @@ export async function POST(request: NextRequest) {
     const thread = await threadService.createThread(
       title,
       content,
-      parseInt(session.user.id)
+      userId
     );
     
     return NextResponse.json(thread);
@@ -44,7 +43,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET - List all threads
+// GET - List all threads (no authentication required)
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;

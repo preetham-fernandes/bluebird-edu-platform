@@ -1,6 +1,6 @@
 // src/app/api/community/threads/[id]/replies/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
+import { getAuthenticatedUserId } from '@/lib/auth/session-helper';
 import * as messageService from '@/lib/services/community/messageService';
 import * as threadService from '@/lib/services/community/threadService';
 
@@ -10,19 +10,11 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    // Get the session
-    const session = await getServerSession();
+    // Get authenticated user ID
+    const { userId, error } = await getAuthenticatedUserId(request);
     
-    // Log the session for debugging
-    console.log("Thread reply session:", session);
-    
-    // Check if user is authenticated
-    if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'You must be signed in to reply to threads' },
-        { status: 401 }
-      );
-    }
+    // Return error if authentication failed
+    if (error) return error;
     
     const threadId = parseInt(params.id);
     
@@ -39,11 +31,20 @@ export async function POST(
     
     // TODO: Check subscription status
     
+    // Check if userId is defined
+    if (userId === undefined) {
+      return NextResponse.json(
+        { error: 'User ID is required' },
+        { status: 401 }
+      );
+    }
+    
+
     // Create reply
     const reply = await messageService.createThreadReply(
       threadId,
       content,
-      parseInt(session.user.id)
+      userId
     );
     
     return NextResponse.json(reply);
@@ -56,7 +57,7 @@ export async function POST(
   }
 }
 
-// GET - Get replies for a thread
+// GET - Get replies for a thread (no authentication required)
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }

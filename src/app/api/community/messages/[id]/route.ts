@@ -1,9 +1,9 @@
 // src/app/api/community/messages/[id]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
+import { getAuthenticatedUserId } from '@/lib/auth/session-helper';
 import * as messageService from '@/lib/services/community/messageService';
 
-// GET - Get a single message with context
+// GET - Get a single message with context (no authentication required)
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -43,15 +43,11 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession();
+    // Get authenticated user ID
+    const { userId, error } = await getAuthenticatedUserId(request);
     
-    // Check if user is authenticated
-    if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'You must be signed in to update messages' },
-        { status: 401 }
-      );
-    }
+    // Return error if authentication failed
+    if (error) return error;
     
     const messageId = parseInt(params.id);
     
@@ -66,11 +62,19 @@ export async function PATCH(
     const body = await request.json();
     const { content } = body;
     
+    // Check if userId is defined
+    if (userId === undefined) {
+      return NextResponse.json(
+        { error: 'User ID is required' },
+        { status: 401 }
+      );
+    }
+
     // Update message
     const message = await messageService.updateMessage(
       messageId,
       content,
-      parseInt(session.user.id)
+      userId
     );
     
     return NextResponse.json(message);
@@ -89,15 +93,11 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession();
+    // Get authenticated user ID
+    const { userId, error } = await getAuthenticatedUserId(request);
     
-    // Check if user is authenticated
-    if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'You must be signed in to delete messages' },
-        { status: 401 }
-      );
-    }
+    // Return error if authentication failed
+    if (error) return error;
     
     const messageId = parseInt(params.id);
     
@@ -108,10 +108,19 @@ export async function DELETE(
       );
     }
     
+    // Check if userId is defined
+    if (userId === undefined) {
+      return NextResponse.json(
+        { error: 'User ID is required' },
+        { status: 401 }
+      );
+    }
+    
+
     // Delete message
     await messageService.deleteMessage(
       messageId,
-      parseInt(session.user.id)
+      userId
     );
     
     return NextResponse.json({ success: true });

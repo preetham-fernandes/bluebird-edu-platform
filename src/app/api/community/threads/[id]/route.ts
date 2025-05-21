@@ -1,9 +1,9 @@
 // src/app/api/community/threads/[id]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
+import { getAuthenticatedUserId } from '@/lib/auth/session-helper';
 import * as threadService from '@/lib/services/community/threadService';
 
-// GET - Get a single thread with replies
+// GET - Get a single thread with replies (no authentication required)
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -43,15 +43,11 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession();
+    // Get authenticated user ID
+    const { userId, error } = await getAuthenticatedUserId(request);
     
-    // Check if user is authenticated
-    if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'You must be signed in to update threads' },
-        { status: 401 }
-      );
-    }
+    // Return error if authentication failed
+    if (error) return error;
     
     const threadId = parseInt(params.id);
     
@@ -66,11 +62,19 @@ export async function PATCH(
     const body = await request.json();
     const { title, content } = body;
     
+    // Check if userId is defined
+    if (userId === undefined) {
+      return NextResponse.json(
+        { error: 'User ID is required' },
+        { status: 401 }
+      );
+    }
+
     // Update thread
     const thread = await threadService.updateThread(
       threadId,
       { title, content },
-      parseInt(session.user.id)
+      userId
     );
     
     return NextResponse.json(thread);
@@ -89,15 +93,11 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession();
+    // Get authenticated user ID
+    const { userId, error } = await getAuthenticatedUserId(request);
     
-    // Check if user is authenticated
-    if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'You must be signed in to delete threads' },
-        { status: 401 }
-      );
-    }
+    // Return error if authentication failed
+    if (error) return error;
     
     const threadId = parseInt(params.id);
     
@@ -108,10 +108,18 @@ export async function DELETE(
       );
     }
     
+    // Check if userId is defined
+    if (userId === undefined) {
+      return NextResponse.json(
+        { error: 'User ID is required' },
+        { status: 401 }
+      );
+    }
+    
     // Delete thread
     await threadService.deleteThread(
       threadId,
-      parseInt(session.user.id)
+      userId
     );
     
     return NextResponse.json({ success: true });

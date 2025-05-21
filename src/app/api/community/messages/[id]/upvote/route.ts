@@ -1,6 +1,6 @@
 // src/app/api/community/messages/[id]/upvote/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
+import { getAuthenticatedUserId } from '@/lib/auth/session-helper';
 import * as upvoteService from '@/lib/services/community/upvoteService';
 
 // GET - Get upvote status for a message
@@ -9,10 +9,11 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession();
+    // Get authenticated user ID
+    const { userId, error } = await getAuthenticatedUserId(request);
     
-    // Check if user is authenticated
-    if (!session?.user?.id) {
+    // If not authenticated, return not upvoted
+    if (error) {
       return NextResponse.json({ upvoted: false });
     }
     
@@ -24,10 +25,18 @@ export async function GET(
         { status: 400 }
       );
     }
+
+    // Check if userId is defined
+    if (userId === undefined) {
+      return NextResponse.json(
+        { error: 'User ID is required' },
+        { status: 401 }
+      );
+    }
     
     const status = await upvoteService.getUpvoteStatus(
       messageId,
-      parseInt(session.user.id)
+      userId
     );
     
     return NextResponse.json(status);
@@ -46,15 +55,11 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession();
+    // Get authenticated user ID
+    const { userId, error } = await getAuthenticatedUserId(request);
     
-    // Check if user is authenticated
-    if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'You must be signed in to upvote messages' },
-        { status: 401 }
-      );
-    }
+    // Return error if authentication failed
+    if (error) return error;
     
     const messageId = parseInt(params.id);
     
@@ -64,11 +69,19 @@ export async function POST(
         { status: 400 }
       );
     }
+
+    // Check if userId is defined
+    if (userId === undefined) {
+      return NextResponse.json(
+        { error: 'User ID is required' },
+        { status: 401 }
+      );
+    }
     
     // Toggle upvote
     const result = await upvoteService.toggleUpvote(
       messageId,
-      parseInt(session.user.id)
+      userId
     );
     
     return NextResponse.json(result);
