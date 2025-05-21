@@ -92,3 +92,31 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
 }
 
 export const useSubscription = () => useContext(SubscriptionContext);
+
+/**
+ * Server-side helper to check subscription status
+ */
+export async function checkUserSubscriptionServer(userId: number): Promise<boolean> {
+  try {
+    const prisma = (await import('@/lib/db/prisma')).default;
+    
+    // Get current date
+    const now = new Date();
+    
+    // Check if user has any active subscription
+    const subscription = await prisma.userSubscription.findFirst({
+      where: {
+        userId,
+        status: 'active',
+        endDate: {
+          gt: now
+        }
+      }
+    });
+    
+    return !!subscription;
+  } catch (error) {
+    console.error('Error checking subscription status:', error);
+    return false;
+  }
+}

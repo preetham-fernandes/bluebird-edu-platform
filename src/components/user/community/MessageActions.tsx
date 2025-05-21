@@ -1,19 +1,26 @@
 // src/components/user/community/MessageActions.tsx
 "use client";
 
-import { AlertCircle, Edit, MessageSquare, MoreHorizontal, Trash } from 'lucide-react';
+import {
+  AlertCircle,
+  Edit,
+  MessageSquare,
+  MoreHorizontal,
+  Trash,
+  Flag,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
-import { useState } from 'react';
-import { useToast } from '@/hooks/use-toast';
-import { useRouter } from 'next/navigation';
-import { useCommunityPermissions } from '@/hooks/useCommunityPermissions';
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
+import { useCommunityPermissions } from "@/hooks/useCommunityPermissions";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,7 +30,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+} from "@/components/ui/alert-dialog";
+import ReportModal from "./ReportModal";
 
 interface MessageActionsProps {
   messageId: number;
@@ -33,39 +41,41 @@ interface MessageActionsProps {
   isTopLevel?: boolean;
 }
 
-export default function MessageActions({ 
-  messageId, 
+export default function MessageActions({
+  messageId,
   userId,
   onReply,
   onMessageDeleted,
-  isTopLevel = false
+  isTopLevel = false,
 }: MessageActionsProps) {
-  const { canReply, canEdit, canDelete, canReport, isAuthor } = useCommunityPermissions();
+  const { canReply, canEdit, canDelete, canReport, isAuthor } =
+    useCommunityPermissions();
   const { toast } = useToast();
   const router = useRouter();
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  
+  const [showReportModal, setShowReportModal] = useState(false);
+
   const handleDelete = async () => {
     try {
       setIsDeleting(true);
-      
+
       const response = await fetch(`/api/community/messages/${messageId}`, {
-        method: 'DELETE',
-        credentials: 'include', // Include cookies with the request
+        method: "DELETE",
+        credentials: "include", // Include cookies with the request
       });
-      
+
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Failed to delete message');
+        throw new Error(error.error || "Failed to delete message");
       }
-      
+
       // Show success toast
       toast({
-        title: 'Message deleted',
-        description: 'Your message has been deleted successfully.',
+        title: "Message deleted",
+        description: "Your message has been deleted successfully.",
       });
-      
+
       // Notify parent
       if (onMessageDeleted) {
         onMessageDeleted();
@@ -74,27 +84,24 @@ export default function MessageActions({
         router.refresh();
       }
     } catch (error) {
-      console.error('Error deleting message:', error);
-      
+      console.error("Error deleting message:", error);
+
       toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to delete message',
-        variant: 'destructive',
+        title: "Error",
+        description:
+          error instanceof Error ? error.message : "Failed to delete message",
+        variant: "destructive",
       });
     } finally {
       setIsDeleting(false);
       setConfirmDelete(false);
     }
   };
-  
+
   const handleReport = () => {
-    // We'll implement this in Phase 5
-    toast({
-      title: 'Report feature',
-      description: 'Message reporting will be available soon.',
-    });
+    setShowReportModal(true);
   };
-  
+
   return (
     <>
       <DropdownMenu>
@@ -110,18 +117,18 @@ export default function MessageActions({
               Reply
             </DropdownMenuItem>
           )}
-          
+
           {isAuthor(userId) && canEdit(userId) && (
             <DropdownMenuItem>
               <Edit className="h-4 w-4 mr-2" />
               Edit
             </DropdownMenuItem>
           )}
-          
+
           {(isAuthor(userId) || canDelete(userId)) && (
             <>
               {canReply && onReply && <DropdownMenuSeparator />}
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 className="text-destructive focus:text-destructive"
                 onClick={() => setConfirmDelete(true)}
               >
@@ -130,33 +137,33 @@ export default function MessageActions({
               </DropdownMenuItem>
             </>
           )}
-          
+
           {canReport && !isAuthor(userId) && (
             <>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleReport}>
-                <AlertCircle className="h-4 w-4 mr-2" />
+                <Flag className="h-4 w-4 mr-2" />
                 Report
               </DropdownMenuItem>
             </>
           )}
         </DropdownMenuContent>
       </DropdownMenu>
-      
+
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this {isTopLevel ? 'reply' : 'message'}? 
-              This action cannot be undone.
+              Are you sure you want to delete this{" "}
+              {isTopLevel ? "reply" : "message"}? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDelete} 
+            <AlertDialogAction
+              onClick={handleDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               disabled={isDeleting}
             >
@@ -165,6 +172,20 @@ export default function MessageActions({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      {/* Report Modal */}
+      <ReportModal
+        isOpen={showReportModal}
+        onClose={() => setShowReportModal(false)}
+        messageId={messageId}
+        onSuccess={() => {
+          setShowReportModal(false);
+          toast({
+            title: "Report submitted",
+            description:
+              "Thank you for your report. Our moderators will review it.",
+          });
+        }}
+      />
     </>
   );
 }

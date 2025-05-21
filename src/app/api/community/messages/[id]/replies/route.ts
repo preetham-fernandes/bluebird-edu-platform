@@ -1,6 +1,7 @@
 // src/app/api/community/messages/[id]/replies/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthenticatedUserId } from '@/lib/auth/session-helper';
+import { checkUserSubscription } from '@/lib/auth/subscription-helper';
 import * as messageService from '@/lib/services/community/messageService';
 
 // POST - Add a reply to a message
@@ -14,6 +15,14 @@ export async function POST(
     
     // Return error if authentication failed
     if (error) return error;
+
+    // Check if userId is defined
+    if (userId === undefined) {
+      return NextResponse.json(
+        { error: 'User ID is required' },
+        { status: 401 }
+      );
+    }
     
     const messageId = parseInt(params.id);
     
@@ -28,8 +37,18 @@ export async function POST(
     const body = await request.json();
     const { content } = body;
     
-    // TODO: Check subscription status
-    
+    // Check subscription status
+    const { hasSubscription, error: subscriptionError } = await checkUserSubscription(userId);
+        
+    if (subscriptionError) return subscriptionError;
+
+    if (!hasSubscription) {
+      return NextResponse.json(
+        { error: 'Subscription required to reply to messages' },
+        { status: 403 }
+      );
+    }    
+
     // Check if userId is defined
     if (userId === undefined) {
       return NextResponse.json(

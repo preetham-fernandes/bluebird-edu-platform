@@ -110,11 +110,17 @@ export const getMessageReplies = async (
 };
 
 // Get a single message
-export const getMessageById = async (id: number) => {
+export const getMessageById = async (id: number, userId?: number) => {
   const message = await messageRepository.getMessageById(id);
   
   if (!message) {
     return null;
+  }
+  
+  // Check if the user has upvoted this message
+  let isUpvoted = false;
+  if (userId) {
+    isUpvoted = await messageRepository.getMessageUpvoteStatus(id, userId);
   }
   
   return {
@@ -123,7 +129,8 @@ export const getMessageById = async (id: number) => {
     createdAt: message.createdAt.toISOString(),
     updatedAt: message.updatedAt.toISOString(),
     replyCount: message._count?.replies || 0,
-    upvoteCount: message._count?.upvotes || 0
+    upvoteCount: message._count?.upvotes || 0,
+    isUpvoted
   };
 };
 

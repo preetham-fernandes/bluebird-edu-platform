@@ -1,6 +1,7 @@
 // src/app/api/community/threads/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthenticatedUserId } from '@/lib/auth/session-helper';
+import { checkUserSubscription } from '@/lib/auth/subscription-helper';
 import * as threadService from '@/lib/services/community/threadService';
 
 // POST - Create a new thread
@@ -24,8 +25,18 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { title, content } = body;
     
-    // TODO: Check subscription status
+    // Check subscription status
+    const { hasSubscription, error: subscriptionError } = await checkUserSubscription(userId);
     
+    if (subscriptionError) return subscriptionError;
+    
+    if (!hasSubscription) {
+      return NextResponse.json(
+        { error: 'Subscription required to create threads' },
+        { status: 403 }
+      );
+    }
+
     // Create thread
     const thread = await threadService.createThread(
       title,

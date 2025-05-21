@@ -2,14 +2,16 @@
 "use client";
 
 import { useState } from 'react';
-import { Loader2, X } from 'lucide-react';
+import { Loader2, X, Lock} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { useCommunityPermissions } from '@/hooks/useCommunityPermissions';
 import UserAvatar from './UserAvatar';
 import { CommunityMessage } from '@/lib/types/community';
 import { useSession } from 'next-auth/react';
+import Link from 'next/link';
 
 interface MessageReplyFormProps {
   messageId: number;
@@ -30,7 +32,8 @@ export default function MessageReplyForm({
   
   const [content, setContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+  // Check if the user is authenticated
+  const isAuthenticated = !!session;
   const isDisabled = !canReply || isSubmitting || content.trim().length === 0;
   
   const handleSubmit = async () => {
@@ -86,8 +89,24 @@ export default function MessageReplyForm({
     }
   };
   
-  if (!canReply) {
+  if (!isAuthenticated) {
     return null;
+  }
+  
+  if (!canReply) {
+    return (
+      <div className="pl-8 pt-3 pb-1">
+        <Card className="p-4 border-dashed">
+          <p className="text-sm text-center mb-2">
+            <Lock className="h-4 w-4 mx-auto mb-1" />
+            Subscription required to reply
+          </p>
+          <Button size="sm" asChild className="w-full">
+            <Link href="/subscriptions">Subscribe Now</Link>
+          </Button>
+        </Card>
+      </div>
+    );
   }
   
   const user = session?.user ? {

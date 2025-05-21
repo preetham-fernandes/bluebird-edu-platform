@@ -9,8 +9,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useCommunityPermissions } from '@/hooks/useCommunityPermissions';
 import UserAvatar from './UserAvatar';
+import SubscriptionRequired from '@/components/user/community/SubscriptionRequired'
 import { CommunityMessage } from '@/lib/types/community';
 import { useSession } from 'next-auth/react';
+import Link from 'next/link';
 
 interface ThreadReplyFormProps {
   threadId: number;
@@ -22,7 +24,7 @@ export default function ThreadReplyForm({
   onReplyAdded 
 }: ThreadReplyFormProps) {
   const { data: session } = useSession();
-  const { canReply, userId } = useCommunityPermissions();
+  const { canReply, userId, isAuthenticated } = useCommunityPermissions();
   const { toast } = useToast();
   
   const [content, setContent] = useState('');
@@ -79,6 +81,24 @@ export default function ThreadReplyForm({
       setIsSubmitting(false);
     }
   };
+
+  if (!isAuthenticated) {
+    return (
+      <Card className="p-6 text-center">
+        <p className="mb-4">Please sign in to join the discussion</p>
+        <Button asChild>
+          <Link href={`/login?callbackUrl=/community/thread/${threadId}`}>
+            Sign In
+          </Link>
+        </Button>
+      </Card>
+    );
+  }
+  
+  // If authenticated but no subscription, show subscription required
+  if (isAuthenticated && !canReply) {
+    return <SubscriptionRequired type="reply" />;
+  }
   
   if (!canReply) {
     return null;
