@@ -1,6 +1,6 @@
 // src/lib/db/repositories/testAttemptRepository.ts
 import prisma from '../prisma';
-import { TestAttemptCreateInput } from '@/lib/types/test';
+import { TestAttemptCreateInput } from '@/types/test';
 
 // Create a new test attempt
 export const createTestAttempt = async (data: TestAttemptCreateInput) => {

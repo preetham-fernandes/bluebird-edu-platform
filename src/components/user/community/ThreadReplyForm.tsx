@@ -10,7 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useCommunityPermissions } from '@/hooks/useCommunityPermissions';
 import UserAvatar from './UserAvatar';
 import SubscriptionRequired from '@/components/user/community/SubscriptionRequired'
-import { CommunityMessage } from '@/lib/types/community';
+import { CommunityMessage } from '@/types/community';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 

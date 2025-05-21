@@ -55,7 +55,7 @@ const navItems: NavItem[] = [
     icon: <Users className="h-5 w-5" />,
   },
   {
-    title: 'Subscriptions',
+    title: 'Subscription Plans',
     href: '/subscriptions',
     icon: <CreditCard className="h-5 w-5" />,
   },

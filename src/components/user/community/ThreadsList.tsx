@@ -1,5 +1,5 @@
 // src/components/user/community/ThreadsList.tsx
-import { CommunityThread } from '@/lib/types/community';
+import { CommunityThread } from '@/types/community';
 import ThreadCard from './ThreadCard';
 import Pagination from './Pagination';
 

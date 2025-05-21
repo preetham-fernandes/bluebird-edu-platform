@@ -1,7 +1,6 @@
-// src/components/user/community/MessageItem.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 import {
   Calendar,
   ChevronDown,
@@ -12,13 +11,14 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CommunityMessage } from "@/lib/types/community";
+import { CommunityMessage } from "@/types/community";
 import { formatDate } from "@/lib/utils/formatMessage";
 import UserAvatar from "./UserAvatar";
 import { useCommunityPermissions } from "@/hooks/useCommunityPermissions";
 import MessageActions from "./MessageActions";
 import MessageReplyForm from "./MessageReplyForm";
 import UpvoteButton from "./UpvoteButton";
+import { getUserDisplayName } from '@/lib/utils/userDisplay';
 
 interface MessageItemProps {
   message: CommunityMessage;
@@ -29,6 +29,9 @@ interface MessageItemProps {
   onMessageDeleted?: () => void;
 }
 
+// Maximum depth for nested replies
+const MAX_DEPTH = 4;
+
 export default function MessageItem({
   message,
   isTopLevel = false,
@@ -38,20 +41,31 @@ export default function MessageItem({
   onMessageDeleted,
 }: MessageItemProps) {
   const { canReply, canUpvote } = useCommunityPermissions();
-  const [showReplies, setShowReplies] = useState(message.replyCount > 0 ? false : true);
+  
+  // Memoize to avoid unnecessary re-renders
+  const hasReplies = useMemo(() => message.replyCount > 0, [message.replyCount]);
+  const shouldShowContinueThread = useMemo(() => 
+    depth >= MAX_DEPTH && hasReplies, 
+    [depth, hasReplies]
+  );
+  
+  // State management
+  const [showReplies, setShowReplies] = useState(!hasReplies);
   const [isReplying, setIsReplying] = useState(false);
   const [replies, setReplies] = useState<CommunityMessage[]>([]);
   const [isLoadingReplies, setIsLoadingReplies] = useState(false);
   const [repliesLoaded, setRepliesLoaded] = useState(false);
+  const [messageData, setMessageData] = useState<CommunityMessage>(message);
 
-  // Load replies if not already loaded
-  const loadReplies = async () => {
-    if (repliesLoaded || message.replyCount === 0) return;
+  // Load replies with useCallback
+  const loadReplies = useCallback(async () => {
+    if (repliesLoaded || !hasReplies) return;
 
     try {
       setIsLoadingReplies(true);
       const response = await fetch(
-        `/api/community/messages/${message.id}/replies`
+        `/api/community/messages/${message.id}/replies`,
+        { cache: 'no-store' }
       );
 
       if (!response.ok) {
@@ -66,208 +80,234 @@ export default function MessageItem({
     } finally {
       setIsLoadingReplies(false);
     }
-  };
+  }, [message.id, repliesLoaded, hasReplies]);
 
   // Toggle showing replies
-  const toggleReplies = async () => {
-    if (!repliesLoaded && message.replyCount > 0) {
+  const toggleReplies = useCallback(async () => {
+    if (!repliesLoaded && hasReplies) {
       await loadReplies();
     }
     setShowReplies((prev) => !prev);
-  };
+  }, [loadReplies, repliesLoaded, hasReplies]);
 
   // Handle reply button click
-  const handleReplyClick = () => {
+  const handleReplyClick = useCallback(() => {
     setIsReplying(true);
-  };
+  }, []);
 
   // Handle new reply added
-  const handleReplyAdded = (newReply: CommunityMessage) => {
+  const handleReplyAdded = useCallback((newReply: CommunityMessage) => {
     // Add the new reply to the list
-    setReplies([...replies, newReply]);
+    setReplies(prev => [...prev, newReply]);
     setRepliesLoaded(true);
+    setIsReplying(false);
 
     // Ensure replies are visible
     setShowReplies(true);
 
-    // Increment the reply count
-    message.replyCount += 1;
+    // Update message data with incremented reply count
+    setMessageData(prev => ({
+      ...prev,
+      replyCount: (prev.replyCount || 0) + 1
+    }));
 
     // Propagate to parent if needed
     if (onReplyAdded) {
       onReplyAdded(newReply);
     }
-  };
+  }, [onReplyAdded]);
 
   // Handle message deleted
-  const handleMessageDeleted = () => {
+  const handleMessageDeleted = useCallback(() => {
     // Mark the message as deleted
-    message.isDeleted = true;
+    setMessageData(prev => ({
+      ...prev,
+      isDeleted: true
+    }));
 
     // Notify parent if needed
     if (onMessageDeleted) {
       onMessageDeleted();
     }
-  };
+  }, [onMessageDeleted]);
 
-  // Maximum depth for nested replies
-  const MAX_DEPTH = 3;
+  // Format reply count text
+  const replyCountText = useMemo(() => 
+    messageData.replyCount === 1 ? "1 Reply" : `${messageData.replyCount} Replies`,
+    [messageData.replyCount]
+  );
 
-  // Show "Continue this thread" for deeply nested replies
-  const shouldShowContinueThread = depth >= MAX_DEPTH && message.replyCount > 0;
+  // Calculate indentation based on depth
+  const indentClass = useMemo(() => {
+    return isTopLevel ? "" : "ml-4 sm:ml-6";
+  }, [isTopLevel]);
+
+  // Calculate left border color and style - much more subtle than before
+  const leftBorderStyle = useMemo(() => {
+    if (isTopLevel) return "";
+    return "border-l-[2px] border-primary/15 dark:border-primary/10 pl-3 sm:pl-4";
+  }, [isTopLevel]);
 
   return (
-    <div className={`${className} ${isTopLevel ? "" : "ml-8 mt-4"}`}>
-      <Card className={`${message.isDeleted ? "opacity-60" : ""}`}>
-        <CardContent className="p-4">
-          {/* Message Header */}
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center">
-              <UserAvatar user={message.user} size="sm" />
-              <div className="ml-2">
-                <div className="font-medium text-sm">
-                  {message.user.name || message.user.username}
-                </div>
-                <div className="text-xs text-muted-foreground">
-                  {formatDate(message.createdAt)}
+    <div className={`${className} ${indentClass} mb-3`}>
+      {/* Message with subtle left border for nesting */}
+      <div className={`relative ${leftBorderStyle}`}>
+        <Card className={`border ${messageData.isDeleted ? "opacity-60 border-muted" : "border-border/80"}`}>
+          <CardContent className="p-3 sm:p-4">
+            {/* Message Header */}
+            <div className="flex items-start sm:items-center justify-between mb-3 gap-2">
+              <div className="flex items-center">
+                <UserAvatar 
+                  user={messageData.user} 
+                  size="sm" 
+                  className="h-7 w-7 sm:h-8 sm:w-8" 
+                />
+                <div className="ml-2 flex flex-col">
+                  <div className="font-medium text-xs sm:text-sm">
+                  {getUserDisplayName(messageData.user)}
+                  </div>
+                  <div className="text-[10px] sm:text-xs text-muted-foreground flex items-center">
+                    <Calendar className="h-3 w-3 mr-1 hidden sm:inline" />
+                    {formatDate(messageData.createdAt)}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {!message.isDeleted && (
-              <MessageActions
-                messageId={message.id}
-                userId={message.userId}
-                onReply={handleReplyClick}
-                onMessageDeleted={handleMessageDeleted}
-                isTopLevel={isTopLevel}
-              />
-            )}
-          </div>
-
-          {/* Message Content */}
-          {message.isDeleted ? (
-            <div className="text-muted-foreground italic">
-              This message has been deleted.
-            </div>
-          ) : (
-            <div
-              className="prose dark:prose-invert max-w-none break-words text-sm sm:text-base"
-              dangerouslySetInnerHTML={{ __html: message.content }}
-            />
-          )}
-        </CardContent>
-
-        {/* Message Actions */}
-        {!message.isDeleted && (
-          <CardFooter className="px-4 py-2 border-t flex justify-between items-center">
-            <div className="flex items-center space-x-2">
-              {/* Upvote button */}
-              <UpvoteButton
-                messageId={message.id}
-                initialCount={message.upvoteCount}
-                initialUpvoted={message.isUpvoted}
-              />
-
-              {/* Reply button */}
-              {canReply && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 px-2"
-                  onClick={handleReplyClick}
-                >
-                  <MessageSquare className="h-4 w-4 mr-1" />
-                  <span>Reply</span>
-                </Button>
+              {!messageData.isDeleted && (
+                <MessageActions
+                  messageId={messageData.id}
+                  userId={messageData.userId}
+                  onReply={handleReplyClick}
+                  onMessageDeleted={handleMessageDeleted}
+                  isTopLevel={isTopLevel}
+                />
               )}
             </div>
 
-            {/* Reply Count Toggle */}
-            {message.replyCount > 0 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8"
-                onClick={toggleReplies}
-              >
-                {isLoadingReplies ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <>
-                    {showReplies ? (
-                      <>
-                        <ChevronUp className="h-4 w-4 mr-1" />
-                        <span>Hide Replies</span>
-                      </>
-                    ) : (
-                      <>
-                        <ChevronDown className="h-4 w-4 mr-1" />
-                        <span>
-                          {message.replyCount === 1
-                            ? "1 Reply"
-                            : `${message.replyCount} Replies`}
-                        </span>
-                      </>
-                    )}
-                  </>
+            {/* Message Content */}
+            <div className="overflow-hidden">
+              {messageData.isDeleted ? (
+                <div className="text-muted-foreground italic text-sm">
+                  This message has been deleted.
+                </div>
+              ) : (
+                <div
+                  className="prose dark:prose-invert max-w-none break-words text-xs sm:text-sm"
+                  dangerouslySetInnerHTML={{ __html: messageData.content }}
+                />
+              )}
+            </div>
+          </CardContent>
+
+          {/* Message Actions */}
+          {!messageData.isDeleted && (
+            <CardFooter className="px-3 sm:px-4 py-1 sm:py-2 border-t flex flex-wrap gap-y-1 justify-between items-center">
+              <div className="flex items-center space-x-1 sm:space-x-2">
+                {/* Upvote button */}
+                <UpvoteButton
+                  messageId={messageData.id}
+                  initialCount={messageData.upvoteCount}
+                  initialUpvoted={messageData.isUpvoted}
+                />
+
+                {/* Reply button */}
+                {canReply && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 sm:h-8 px-1 sm:px-2 text-xs sm:text-sm"
+                    onClick={handleReplyClick}
+                  >
+                    <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                    <span className="hidden xs:inline">Reply</span>
+                  </Button>
                 )}
-              </Button>
-            )}
-          </CardFooter>
-        )}
-      </Card>
+              </div>
+
+              {/* Reply Count Toggle */}
+              {hasReplies && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 sm:h-8 text-xs sm:text-sm ml-auto"
+                  onClick={toggleReplies}
+                  disabled={isLoadingReplies}
+                  aria-expanded={showReplies}
+                >
+                  {isLoadingReplies ? (
+                    <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
+                  ) : (
+                    <>
+                      {showReplies ? (
+                        <>
+                          <ChevronUp className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                          <span className="hidden xs:inline">Hide Replies</span>
+                          <span className="xs:hidden">Hide</span>
+                        </>
+                      ) : (
+                        <>
+                          <ChevronDown className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                          <span>{replyCountText}</span>
+                        </>
+                      )}
+                    </>
+                  )}
+                </Button>
+              )}
+            </CardFooter>
+          )}
+        </Card>
+      </div>
 
       {/* Reply Form */}
-      {isReplying && !message.isDeleted && (
-        <MessageReplyForm
-          messageId={message.id}
-          onReplyAdded={handleReplyAdded}
-          onCancel={() => setIsReplying(false)}
-        />
-      )}
+      <div className={`transition-all duration-200 overflow-hidden ${isReplying ? 'max-h-72 opacity-100 mt-3 ml-4 sm:ml-6' : 'max-h-0 opacity-0'}`}>
+        {isReplying && !messageData.isDeleted && (
+          <MessageReplyForm
+            messageId={messageData.id}
+            onReplyAdded={handleReplyAdded}
+            onCancel={() => setIsReplying(false)}
+          />
+        )}
+      </div>
 
       {/* Nested Replies */}
-      {showReplies &&
-        repliesLoaded &&
-        replies.length > 0 &&
-        !shouldShowContinueThread && (
-          <div className="space-y-3 mt-3">
-            {replies.map((reply) => (
-              <MessageItem
-                key={reply.id}
-                message={reply}
-                depth={depth + 1}
-                onReplyAdded={(newReply) => {
-                  // Update reply count when a reply is added to a child
-                  message.replyCount += 1;
+      {showReplies && repliesLoaded && replies.length > 0 && !shouldShowContinueThread && (
+        <div className="mt-3">
+          {replies.map((reply) => (
+            <MessageItem
+              key={reply.id}
+              message={reply}
+              depth={depth + 1}
+              onReplyAdded={(newReply) => {
+                setMessageData(prev => ({
+                  ...prev,
+                  replyCount: (prev.replyCount || 0) + 1
+                }));
 
-                  // Propagate to parent if needed
-                  if (onReplyAdded) {
-                    onReplyAdded(newReply);
-                  }
-                }}
-              />
-            ))}
-          </div>
-        )}
+                if (onReplyAdded) {
+                  onReplyAdded(newReply);
+                }
+              }}
+            />
+          ))}
+        </div>
+      )}
 
       {/* "Continue this thread" for deep nesting */}
       {shouldShowContinueThread && showReplies && (
-        <div className="ml-8 mt-4">
+        <div className={`mt-3 ${leftBorderStyle}`}>
           <Button
             variant="outline"
-            className="w-full justify-center"
+            className="w-full justify-center text-xs sm:text-sm h-8"
             size="sm"
             onClick={() => {
-              // In a full implementation, this would open a modal with the thread continuation
               alert(
                 "Continue thread functionality will be implemented in Phase 6"
               );
             }}
           >
             <span>Continue this thread</span>
-            <ChevronDown className="ml-2 h-4 w-4" />
+            <ChevronDown className="ml-2 h-3 w-3 sm:h-4 sm:w-4" />
           </Button>
         </div>
       )}

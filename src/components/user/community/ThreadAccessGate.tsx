@@ -2,7 +2,7 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { CommunityThread } from "@/lib/types/community";
+import { CommunityThread } from "@/types/community";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { LogIn, Lock } from "lucide-react";

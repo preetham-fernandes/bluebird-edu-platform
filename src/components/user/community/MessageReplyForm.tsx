@@ -9,7 +9,7 @@ import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { useCommunityPermissions } from '@/hooks/useCommunityPermissions';
 import UserAvatar from './UserAvatar';
-import { CommunityMessage } from '@/lib/types/community';
+import { CommunityMessage } from '@/types/community';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 

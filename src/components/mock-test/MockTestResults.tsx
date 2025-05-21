@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { TestQuestion } from '@/lib/types/test';
+import { TestQuestion } from '@/types/test';
 import { cn } from '@/lib/utils';
 
 interface MockTestResultsProps {

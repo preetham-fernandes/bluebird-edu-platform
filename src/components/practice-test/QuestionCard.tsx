@@ -18,7 +18,7 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { cn } from '@/lib/utils';
-import { TestQuestion } from '@/lib/types/test';
+import { TestQuestion } from '@/types/test';
 
 interface QuestionCardProps {
   question: TestQuestion;

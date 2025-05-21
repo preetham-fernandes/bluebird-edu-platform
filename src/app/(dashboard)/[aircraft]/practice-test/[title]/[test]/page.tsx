@@ -9,7 +9,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import QuestionCard from '@/components/practice-test/QuestionCard';
 import ProgressHeader from '@/components/practice-test/ProgressHeader';
 import TestResults from '@/components/practice-test/TestResults';
-import { Test, QuestionResponse } from '@/lib/types/test';
+import { Test, QuestionResponse } from '@/types/test';
 
 // Number of questions per page
 const QUESTIONS_PER_PAGE = 5;

@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { CommunityThread, CommunityMessage } from "@/lib/types/community";
+import { CommunityThread, CommunityMessage } from "@/types/community";
 import { formatDate } from "@/lib/utils/formatMessage";
 import UserAvatar from "./UserAvatar";
 import MessageItem from "./MessageItem";
@@ -31,6 +31,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { getUserDisplayName } from '@/lib/utils/userDisplay';
 
 interface ThreadDetailProps {
   thread: CommunityThread;
@@ -160,7 +161,7 @@ export default function ThreadDetail({ thread }: ThreadDetailProps) {
               </CardTitle>
               <div className="text-xs sm:text-sm text-muted-foreground flex flex-wrap items-center gap-1">
                 <span className="truncate max-w-[150px] sm:max-w-[200px] lg:max-w-xs">
-                  Posted by {threadData.user.name || threadData.user.username}
+                  Posted by {getUserDisplayName(thread.user)}
                 </span>
                 <span aria-hidden="true">•</span>
                 <span className="whitespace-nowrap flex items-center">

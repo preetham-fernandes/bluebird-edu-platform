@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircle, ChevronLeft, ChevronRight, Timer } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Test } from '@/lib/types/test';
+import { Test } from '@/types/test';
 import MockTestQuestionCard from '@/components/mock-test/MockTestQuestionCard';
 import MockTestProgressHeader from '@/components/mock-test/MockTestProgressHeader';
 import MockTestResults from '@/components/mock-test/MockTestResults';

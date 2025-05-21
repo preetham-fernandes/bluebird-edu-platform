@@ -1,7 +1,8 @@
 // src/components/user/community/UserAvatar.tsx
 import { User } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { CommunityUser } from '@/lib/types/community';
+import { CommunityUser } from '@/types/community';
+import { getUserDisplayName } from '@/lib/utils/userDisplay';
 
 interface UserAvatarProps {
   user: CommunityUser;
@@ -16,10 +17,10 @@ export default function UserAvatar({
 }: UserAvatarProps) {
   // Get user initials for the fallback
   const getInitials = () => {
-    if (!user?.name && !user?.username) return '?';
+    if (!user) return '?';
     
-    const nameToUse = user.name || user.username || '';
-    const parts = nameToUse.split(' ').filter(Boolean);
+    const displayName = getUserDisplayName(user);
+    const parts = displayName.split(' ').filter(Boolean);
     
     if (parts.length === 0) return '?';
     if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
@@ -81,11 +82,19 @@ export default function UserAvatar({
     return colors[user.id % colors.length] || 'bg-primary/10 text-primary';
   };
   
+  // Get the avatar image URL
+  const getAvatarImageUrl = () => {
+    if (!user.avatarChoice) return "";
+    
+    // Use the correct path to your avatar images
+    return `/avatars/${user.avatarChoice}.svg`;
+  };
+
   return (
     <Avatar className={`${getAvatarSize()} ${className}`}>
       <AvatarImage 
-        src={user.avatarChoice ? `/images/avatars/${user.avatarChoice}.png` : undefined} 
-        alt={user.name || user.username || 'User'}
+        src={getAvatarImageUrl()}
+        alt={getUserDisplayName(user)}
       />
       <AvatarFallback className={`${getFallbackSize()} ${getAvatarColor()}`}>
         {getInitials()}
