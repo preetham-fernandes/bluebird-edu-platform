@@ -30,7 +30,7 @@ export default function ThreadAccessGate({ thread }: ThreadAccessGateProps) {
             <CardTitle className="text-2xl">{thread.title}</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="prose dark:prose-invert max-w-none line-clamp-4">
+            <div className="prose dark:prose-invert max-w-none text-sm sm:text-base line-clamp-4">
               <div dangerouslySetInnerHTML={{ __html: thread.content }} />
             </div>
             <div className="mt-4 pt-4 border-t">

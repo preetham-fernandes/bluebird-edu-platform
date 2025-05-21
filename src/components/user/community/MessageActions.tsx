@@ -48,7 +48,7 @@ export default function MessageActions({
   onMessageDeleted,
   isTopLevel = false,
 }: MessageActionsProps) {
-  const { canReply, canEdit, canDelete, canReport, isAuthor } =
+  const { canDelete, canReport, isAuthor } =
     useCommunityPermissions();
   const { toast } = useToast();
   const router = useRouter();
@@ -111,23 +111,9 @@ export default function MessageActions({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          {canReply && onReply && (
-            <DropdownMenuItem onClick={onReply}>
-              <MessageSquare className="h-4 w-4 mr-2" />
-              Reply
-            </DropdownMenuItem>
-          )}
-
-          {isAuthor(userId) && canEdit(userId) && (
-            <DropdownMenuItem>
-              <Edit className="h-4 w-4 mr-2" />
-              Edit
-            </DropdownMenuItem>
-          )}
 
           {(isAuthor(userId) || canDelete(userId)) && (
             <>
-              {canReply && onReply && <DropdownMenuSeparator />}
               <DropdownMenuItem
                 className="text-destructive focus:text-destructive"
                 onClick={() => setConfirmDelete(true)}
@@ -140,7 +126,6 @@ export default function MessageActions({
 
           {canReport && !isAuthor(userId) && (
             <>
-              <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleReport}>
                 <Flag className="h-4 w-4 mr-2" />
                 Report

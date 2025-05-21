@@ -1,6 +1,6 @@
 // src/components/user/community/ThreadCard.tsx
 import Link from "next/link";
-import { MessageSquare } from "lucide-react";
+import { MessageSquare, ThumbsUp } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -45,6 +45,15 @@ export default function ThreadCard({ thread }: ThreadCardProps) {
                 <span>{formatDate(thread.createdAt)}</span>
               </span>
             </div>
+          </div>
+
+          <div className="flex items-center text-sm text-muted-foreground ml-auto mr-4">
+            <ThumbsUp className="h-4 w-4 mr-1" />
+            <span>
+              {thread.upvoteCount === 1
+                ? "1 upvote"
+                : `${thread.upvoteCount} upvotes`}
+            </span>
           </div>
 
           <div className="flex items-center text-sm text-muted-foreground">

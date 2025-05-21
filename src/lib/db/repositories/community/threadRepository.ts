@@ -55,9 +55,10 @@ export const getThreads = async (
 // Get a single thread with its replies
 export const getThreadById = async (
   id: number,
-  includeDeleted: boolean = false
+  includeDeleted: boolean = false,
+  userId?: number // Add this parameter
 ) => {
-  return prisma.communityThread.findUnique({
+  const thread = await prisma.communityThread.findUnique({
     where: { 
       id,
       isDeleted: includeDeleted ? undefined : false
@@ -69,6 +70,15 @@ export const getThreadById = async (
           name: true,
           username: true,
           avatarChoice: true
+        }
+      },
+      upvotes: userId ? {
+        where: { userId },
+        take: 1
+      } : undefined,
+      _count: {
+        select: {
+          upvotes: true
         }
       },
       replies: {
@@ -99,6 +109,8 @@ export const getThreadById = async (
       }
     }
   });
+
+  return thread;
 };
 
 // Create a new thread

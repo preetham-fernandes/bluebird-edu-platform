@@ -19,6 +19,7 @@ import UserAvatar from "./UserAvatar";
 import MessageItem from "./MessageItem";
 import ThreadReplyForm from "./ThreadReplyForm";
 import { useCommunityPermissions } from "@/hooks/useCommunityPermissions";
+import ThreadUpvoteButton from "./ThreadUpvoteButton";
 import { useToast } from "@/hooks/use-toast";
 import {
   AlertDialog,
@@ -145,7 +146,7 @@ export default function ThreadDetail({ thread }: ThreadDetailProps) {
   return (
     <div className="space-y-6 animate-in fade-in">
       {/* Thread Content */}
-      <Card className="mb-4 border-border/40 shadow-sm hover:shadow transition-shadow duration-200">
+      <Card className="mb-2 border-border/40 shadow-sm hover:shadow transition-shadow duration-200">
         <CardHeader className="pb-3">
           <div className="flex items-start space-x-4">
             <UserAvatar
@@ -179,13 +180,20 @@ export default function ThreadDetail({ thread }: ThreadDetailProps) {
         </CardContent>
 
         {/* Thread Actions */}
-        <CardFooter className="pt-0 flex flex-wrap gap-2 justify-between">
+        <CardFooter className="pt-0 flex flex-wrap gap-2 justify-start">
+          <ThreadUpvoteButton
+            threadId={thread.id}
+            initialCount={thread.upvoteCount || 0}
+            initialUpvoted={thread.isUpvoted}
+            variant="outline"
+            size="sm"
+          />
           {canReply && (
             <Button
               variant="outline"
               size="sm"
               onClick={toggleReplyForm}
-              className="mr-auto"
+              className="mr-2"
               aria-expanded={showReplyForm}
             >
               <MessageSquare className="h-4 w-4 mr-1.5" />
@@ -193,13 +201,7 @@ export default function ThreadDetail({ thread }: ThreadDetailProps) {
             </Button>
           )}
 
-          <div className="flex flex-wrap gap-2">
-            {isAuthor(threadData.userId) && (
-              <Button variant="outline" size="sm" className="h-9">
-                <Edit className="h-4 w-4 sm:mr-1.5" />
-                <span className="hidden sm:inline">Edit</span>
-              </Button>
-            )}
+          <div className="flex flex-wrap gap-2 ml-auto">
             {canDelete(threadData.userId) && (
               <Button
                 variant="destructive"
@@ -234,7 +236,6 @@ export default function ThreadDetail({ thread }: ThreadDetailProps) {
       <div className="space-y-1">
         <div className="flex items-center justify-between">
           <h2 className="text-lg sm:text-xl font-semibold flex items-center">
-            <MessageSquare className="h-5 w-5 mr-2 text-muted-foreground" />
             <span>{threadData.replyCount || 0} Replies</span>
           </h2>
 

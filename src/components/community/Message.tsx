@@ -32,7 +32,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import ReportModal from "./ReportModal";
+import ReportModal from "../user/community/ReportModal";
 
 interface MessageProps {
   id: number;

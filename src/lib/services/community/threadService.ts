@@ -27,12 +27,15 @@ export const getThreads = async (
 };
 
 // Get a single thread with its replies
-export const getThreadById = async (id: number) => {
-  const thread = await threadRepository.getThreadById(id);
+export const getThreadById = async (id: number, userId?: number) => {
+  const thread = await threadRepository.getThreadById(id, false, userId);
   
   if (!thread) {
     return null;
   }
+  
+  // Check if the thread is upvoted by the user
+  const isUpvoted = userId ? thread.upvotes && thread.upvotes.length > 0 : false;
   
   // Format timestamps and content
   const formattedThread = {
@@ -41,6 +44,8 @@ export const getThreadById = async (id: number) => {
     createdAt: thread.createdAt.toISOString(),
     updatedAt: thread.updatedAt.toISOString(),
     replyCount: thread.replyCount,
+    upvoteCount: thread._count?.upvotes || 0,
+    isUpvoted,
     replies: thread.replies.map(reply => ({
       ...reply,
       content: formatMessage(reply.content),

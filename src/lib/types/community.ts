@@ -19,6 +19,8 @@ export interface CommunityUser {
     createdAt: string;
     updatedAt: string;
     replyCount: number;
+    upvoteCount: number;  // Add this field
+    isUpvoted?: boolean;  // Add this field
     replies?: CommunityMessage[];
   }
   

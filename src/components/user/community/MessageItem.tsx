@@ -38,7 +38,7 @@ export default function MessageItem({
   onMessageDeleted,
 }: MessageItemProps) {
   const { canReply, canUpvote } = useCommunityPermissions();
-  const [showReplies, setShowReplies] = useState(true);
+  const [showReplies, setShowReplies] = useState(message.replyCount > 0 ? false : true);
   const [isReplying, setIsReplying] = useState(false);
   const [replies, setReplies] = useState<CommunityMessage[]>([]);
   const [isLoadingReplies, setIsLoadingReplies] = useState(false);
@@ -73,7 +73,7 @@ export default function MessageItem({
     if (!repliesLoaded && message.replyCount > 0) {
       await loadReplies();
     }
-    setShowReplies(!showReplies);
+    setShowReplies((prev) => !prev);
   };
 
   // Handle reply button click
@@ -152,7 +152,7 @@ export default function MessageItem({
             </div>
           ) : (
             <div
-              className="prose dark:prose-invert max-w-none prose-sm"
+              className="prose dark:prose-invert max-w-none break-words text-sm sm:text-base"
               dangerouslySetInnerHTML={{ __html: message.content }}
             />
           )}
@@ -193,19 +193,23 @@ export default function MessageItem({
               >
                 {isLoadingReplies ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
-                ) : showReplies ? (
-                  <>
-                    <ChevronUp className="h-4 w-4 mr-1" />
-                    <span>Hide Replies</span>
-                  </>
                 ) : (
                   <>
-                    <ChevronDown className="h-4 w-4 mr-1" />
-                    <span>
-                      {message.replyCount === 1
-                        ? "1 Reply"
-                        : `${message.replyCount} Replies`}
-                    </span>
+                    {showReplies ? (
+                      <>
+                        <ChevronUp className="h-4 w-4 mr-1" />
+                        <span>Hide Replies</span>
+                      </>
+                    ) : (
+                      <>
+                        <ChevronDown className="h-4 w-4 mr-1" />
+                        <span>
+                          {message.replyCount === 1
+                            ? "1 Reply"
+                            : `${message.replyCount} Replies`}
+                        </span>
+                      </>
+                    )}
                   </>
                 )}
               </Button>

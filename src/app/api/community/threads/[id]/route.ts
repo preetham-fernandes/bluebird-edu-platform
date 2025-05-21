@@ -18,7 +18,10 @@ export async function GET(
       );
     }
     
-    const thread = await threadService.getThreadById(threadId);
+    // Get user ID if authenticated (without requiring authentication)
+    const { userId } = await getAuthenticatedUserId(request);
+    
+    const thread = await threadService.getThreadById(threadId, userId);
     
     if (!thread) {
       return NextResponse.json(

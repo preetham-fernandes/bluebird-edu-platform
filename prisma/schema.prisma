@@ -3,7 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../node_modules/@prisma/client"
+  output   = "../node_modules/.prisma/client"
 
 }
 
@@ -48,6 +48,7 @@ model User {
   // Add these new relations
   communityThreads   CommunityThread[]
   communityMessages  CommunityMessage[]
+  threadUpvotes    ThreadUpvote[]
   messageUpvotes     MessageUpvote[]
   messageReports     MessageReport[]
 }
@@ -273,6 +274,9 @@ model CommunityThread {
   replyCount  Int                 @default(0)
   replies     CommunityMessage[]
 
+  upvotes     ThreadUpvote[]
+  upvoteCount Int             @default(0)
+
   @@index([userId])
   @@index([createdAt])
 }
@@ -297,6 +301,18 @@ model CommunityMessage {
   @@index([threadId])
   @@index([parentId])
   @@index([createdAt])
+  @@index([userId])
+}
+
+model ThreadUpvote {
+  id          Int              @id @default(autoincrement())
+  threadId    Int
+  thread      CommunityThread  @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  userId      Int
+  user        User             @relation(fields: [userId], references: [id])
+  createdAt   DateTime         @default(now())
+
+  @@unique([threadId, userId]) // Prevent duplicate votes
   @@index([userId])
 }
 
