@@ -7,11 +7,18 @@ import { signIn } from "next-auth/react";
 import { AuthForm } from "@/components/auth/auth-form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
+interface RegisterFormData {
+  name?: string;
+  email: string;
+  password: string;
+  provider?: "credentials" | "google";
+}
+
 export default function RegisterPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: RegisterFormData) => {
     try {
       setError(null);
       
@@ -48,7 +55,7 @@ export default function RegisterPage() {
 
       // Redirect to dashboard
       router.push("/dashboard");
-    } catch (error) {
+    } catch {
       setError("Something went wrong. Please try again.");
     }
   };

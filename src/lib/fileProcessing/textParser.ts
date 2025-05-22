@@ -1,5 +1,6 @@
 // src/lib/fileProcessing/textParser.ts
 import { validateQuestionData } from './validationRules';
+import * as XLSX from 'xlsx';
 
 // Define the structure for questions
 export interface QuestionOption {
@@ -159,5 +160,36 @@ export async function parseTxtFile(txtContent: string): Promise<QuestionData[]> 
   } catch (error) {
     console.error('Error parsing text file:', error);
     throw new Error('Failed to parse text file: ' + (error instanceof Error ? error.message : String(error)));
+  }
+}
+
+/**
+ * Parses a CSV file content into structured question data
+ */
+export async function parseCsvFile(csvContent: string): Promise<QuestionData[]> {
+  // CSV parsing is similar to text file parsing since both are text-based
+  return parseTxtFile(csvContent);
+}
+
+/**
+ * Parses an Excel file buffer into structured question data
+ */
+export async function parseExcelFile(fileBuffer: ArrayBuffer): Promise<QuestionData[]> {
+  try {
+    // Read the Excel file
+    const workbook = XLSX.read(fileBuffer, { type: 'array' });
+    
+    // Get the first sheet
+    const firstSheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[firstSheetName];
+    
+    // Convert to CSV format
+    const csvContent = XLSX.utils.sheet_to_csv(worksheet);
+    
+    // Use the CSV parser to handle the data
+    return parseCsvFile(csvContent);
+  } catch (error) {
+    console.error('Error parsing Excel file:', error);
+    throw new Error('Failed to parse Excel file: ' + (error instanceof Error ? error.message : String(error)));
   }
 }

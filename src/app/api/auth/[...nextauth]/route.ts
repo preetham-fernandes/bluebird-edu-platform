@@ -8,17 +8,41 @@ import { compare } from "bcrypt";
 import prisma from "@/lib/db/prisma";
 import type { NextAuthOptions } from "next-auth";
 
+interface UserData {
+  email: string;
+  name?: string;
+  image?: string;
+  emailVerified?: Date | null;
+  profileCompleted?: boolean;
+  role?: string;
+  profileImg?: string;
+}
+
+interface CredentialsType {
+  email: string;
+  password: string;
+}
+
+interface GoogleProfile {
+  email: string;
+  name?: string;
+  picture?: string;
+}
+
 // Create a custom adapter by extending the PrismaAdapter
 const customAdapter = {
   ...PrismaAdapter(prisma),
-  createUser: async (data: any) => {
+  createUser: async (data: UserData) => {
     // Map 'image' field to 'profileImg' in your schema
     const { image, ...userData } = data;
     
     return prisma.user.create({
       data: {
         ...userData,
-        profileImg: image, // Store the image URL in profileImg field
+        name: userData.name || '',  // Ensure name is never undefined
+        profileImg: image || null,  // Allow null for profileImg
+        role: userData.role || 'user',  // Default role
+        profileCompleted: userData.profileCompleted || false  // Default to false
       },
     });
   },
@@ -48,11 +72,11 @@ const customAdapter = {
       image: user.profileImg,
     };
   },
-  // You might need other methods based on what NextAuth uses
 };
 
 const authOptions: NextAuthOptions = {
   debug: true, // Set to false in production
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   adapter: customAdapter as any,
   providers: [
     GoogleProvider({
@@ -125,25 +149,20 @@ const authOptions: NextAuthOptions = {
     signIn: "/login",
     signOut: "/logout",
     error: "/error",
-    // newUser: "/auth/register", // Commented out as it might cause issues
   },
   session: {
     strategy: "jwt",
   },
   callbacks: {
-    async signIn({ user, account, profile }) {
-        // Log information to help debug
-        console.log("Sign in callback:", { user, account, profile });
+    async signIn({ user }) {
         return true;
     },
     async session({ session, token }) {
-      // Assign the sub value from token to session.user.id
       if (token) {
         session.user.id = token.sub ?? token.id ?? ''; // Fallback to empty string if both are undefined
         session.user.role = token.role as string;
         session.user.profileCompleted = token.profileCompleted as boolean;
         
-        // Ensure image field is properly populated
         if (!session.user.image && token.picture) {
           session.user.image = token.picture as string;
         }
@@ -151,14 +170,11 @@ const authOptions: NextAuthOptions = {
       return session;
     },
     async jwt({ token, user, trigger, session }) {
-        console.log("JWT callback:", { token, user });
-
       // Initial sign in
       if (user) {
         token.id = user.id.toString();
         token.role = user.role || "user";
         token.profileCompleted = user.profileCompleted || false;
-        // Store the profile image URL in the token
         if (user.image) {
           token.picture = user.image;
         }
@@ -166,8 +182,6 @@ const authOptions: NextAuthOptions = {
       
       // Update token when session is updated
       if (trigger === "update" && session) {
-        // Make sure the session includes the role
-        console.log("Session update:", session);
         if (session.user?.role) {
           token.role = session.user.role;
         }

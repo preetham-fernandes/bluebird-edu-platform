@@ -1,7 +1,7 @@
 // src/app/(dashboard)/[aircraft]/mock-test/[title]/[test]/page.tsx
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -51,7 +51,7 @@ export default function MockTestPage() {
         const response = await fetch(`/api/mock-tests/${testId}`);
         
         if (!response.ok) {
-          throw new Error('Failed to fetch test data');
+          throw new Error("Failed to fetch test data");
         }
         
         const data = await response.json();
@@ -74,60 +74,8 @@ export default function MockTestPage() {
     }
   }, [test]);
   
-  // Timer logic
-  useEffect(() => {
-    if (timeRemaining !== null && timeRemaining > 0 && !testSubmitted) {
-      timerRef.current = setInterval(() => {
-        setTimeRemaining(prev => {
-          if (prev === null || prev <= 1) {
-            // Time's up
-            if (timerRef.current) clearInterval(timerRef.current);
-            setTimeExpired(true);
-            handleSubmitTest(); // Auto-submit when time expires
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
-    
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [timeRemaining, testSubmitted]);
-  
-  // Format time remaining for display
-  const formatTime = (seconds: number): string => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-    
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
-  
-  // Handle answer selection
-  const handleAnswer = (questionId: number, answer: string) => {
-    setResponses(prev => ({
-      ...prev,
-      [questionId]: answer
-    }));
-  };
-  
-  // Navigation functions
-  const goToPreviousQuestion = () => {
-    if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex(prev => prev - 1);
-    }
-  };
-  
-  const goToNextQuestion = () => {
-    if (testData && currentQuestionIndex < testData.questions.length - 1) {
-      setCurrentQuestionIndex(prev => prev + 1);
-    }
-  };
-  
   // Handle test submission
-  const handleSubmitTest = async () => {
+  const handleSubmitTest = useCallback(async () => {
     if (!testData) return;
     
     try {
@@ -171,7 +119,7 @@ export default function MockTestPage() {
       });
       
       if (!response.ok) {
-        throw new Error('Failed to submit test attempt');
+        throw new Error("Failed to submit test attempt");
       }
       
       // Stop the timer
@@ -185,6 +133,58 @@ export default function MockTestPage() {
       console.error('Error submitting test:', err);
       // Even if submission fails, show results to the user
       setTestSubmitted(true);
+    }
+  }, [testData, responses, timeRemaining]);
+  
+  // Timer logic
+  useEffect(() => {
+    if (timeRemaining !== null && timeRemaining > 0 && !testSubmitted) {
+      timerRef.current = setInterval(() => {
+        setTimeRemaining(prev => {
+          if (prev === null || prev <= 1) {
+            // Time's up
+            if (timerRef.current) clearInterval(timerRef.current);
+            setTimeExpired(true);
+            handleSubmitTest(); // Auto-submit when time expires
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [timeRemaining, testSubmitted, handleSubmitTest]);
+  
+  // Format time remaining for display
+  const formatTime = (seconds: number): string => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+  
+  // Handle answer selection
+  const handleAnswer = (questionId: number, answer: string) => {
+    setResponses(prev => ({
+      ...prev,
+      [questionId]: answer
+    }));
+  };
+  
+  // Navigation functions
+  const goToPreviousQuestion = () => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex(prev => prev - 1);
+    }
+  };
+  
+  const goToNextQuestion = () => {
+    if (testData && currentQuestionIndex < testData.questions.length - 1) {
+      setCurrentQuestionIndex(prev => prev + 1);
     }
   };
   
@@ -256,7 +256,6 @@ export default function MockTestPage() {
   
   // Current question
   const currentQuestion = testData.questions[currentQuestionIndex];
-  const hasUserAnswered = !!responses[currentQuestion.id];
   const isLastQuestion = currentQuestionIndex === testData.questions.length - 1;
   const answeredCount = Object.keys(responses).length;
   

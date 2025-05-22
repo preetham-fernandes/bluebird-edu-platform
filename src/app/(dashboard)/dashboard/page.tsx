@@ -51,7 +51,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
         <div className="max-w-4xl">
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Welcome to Bluebird</h1>
           <p className="text-muted-foreground mt-2">
-            Strap in, run your checklist, and see what you're flying into.
+            Strap in, run your checklist, and see what you&apos;re flying into.
           </p>
         </div>
 

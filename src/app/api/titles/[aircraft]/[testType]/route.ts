@@ -1,19 +1,12 @@
-// src/app/api/titles/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db/prisma';
 
-export async function GET(request: NextRequest) {
+export async function GET(
+  _request: NextRequest,
+  { params }: { params: { aircraft: string; testType: string } }
+) {
   try {
-    const searchParams = request.nextUrl.searchParams;
-    const aircraft = searchParams.get('aircraft');
-    const testType = searchParams.get('testType');
-    
-    if (!aircraft || !testType) {
-      return NextResponse.json(
-        { error: 'Aircraft and test type parameters are required' },
-        { status: 400 }
-      );
-    }
+    const { aircraft, testType } = params;
     
     // Find the aircraft by slug or name
     const aircraftEntity = await prisma.aircraft.findFirst({
@@ -23,7 +16,6 @@ export async function GET(request: NextRequest) {
           { 
             name: {
               contains: aircraft.split('-').join(' '), 
-            //   mode: 'insensitive'
             } 
           }
         ]
@@ -39,7 +31,6 @@ export async function GET(request: NextRequest) {
       where: {
         type: {
           equals: testType,
-        //   mode: 'insensitive'
         }
       }
     });
@@ -65,11 +56,22 @@ export async function GET(request: NextRequest) {
     });
     
     // Format the response
-    const formattedTitles = titles.map(title => ({
+    const formattedTitles = titles.map((title: {
+      id: number;
+      name: string;
+      slug: string;
+      aircraftId: number;
+      testTypeId: number;
+      createdAt: Date;
+      updatedAt: Date;
+    }) => ({
       id: title.id,
       name: title.name,
       slug: title.slug,
-      testCount: title.tests.length
+      aircraftId: title.aircraftId,
+      testTypeId: title.testTypeId,
+      createdAt: title.createdAt,
+      updatedAt: title.updatedAt,
     }));
     
     return NextResponse.json(formattedTitles);
@@ -80,4 +82,4 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+} 

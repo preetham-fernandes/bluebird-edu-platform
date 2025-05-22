@@ -1,20 +1,14 @@
-// src/app/api/tests/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db/prisma';
 
-export async function GET(request: NextRequest) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { aircraft: string; title: string } }
+) {
   try {
+    const { aircraft, title } = params;
     const searchParams = request.nextUrl.searchParams;
-    const aircraft = searchParams.get('aircraft');
-    const title = searchParams.get('title');
     const testType = searchParams.get('testType');
-    
-    if (!aircraft || !title) {
-      return NextResponse.json(
-        { error: 'Aircraft and title parameters are required' },
-        { status: 400 }
-      );
-    }
     
     // Find the aircraft by slug or name
     const aircraftEntity = await prisma.aircraft.findFirst({
@@ -24,7 +18,6 @@ export async function GET(request: NextRequest) {
           { 
             name: {
               contains: aircraft.split('-').join(' '), 
-            //   mode: 'insensitive'
             } 
           }
         ]
@@ -42,7 +35,6 @@ export async function GET(request: NextRequest) {
         where: {
           type: {
             equals: testType,
-            // mode: 'insensitive'
           }
         }
       });
@@ -62,7 +54,6 @@ export async function GET(request: NextRequest) {
           { 
             name: { 
               contains: title.split('-').join(' '),
-            //   mode: 'insensitive'
             }
           }
         ]
@@ -94,12 +85,20 @@ export async function GET(request: NextRequest) {
     });
     
     // Format the response
-    const formattedTests = tests.map(test => ({
+    const formattedTests = tests.map((test: {
+      id: number;
+      title: string;
+      titleRef?: { name: string } | null;
+      isActive: boolean;
+      createdAt: Date;
+      updatedAt: Date;
+    }) => ({
       id: test.id,
       title: test.title,
       subject: test.titleRef?.name || '',
-      totalQuestions: test.totalQuestions || test.questions.length,
-      timeLimit: test.timeLimit
+      isActive: test.isActive,
+      createdAt: test.createdAt,
+      updatedAt: test.updatedAt,
     }));
     
     return NextResponse.json(formattedTests);
@@ -110,4 +109,4 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+} 

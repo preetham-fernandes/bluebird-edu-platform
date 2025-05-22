@@ -96,11 +96,12 @@ const ThreadsLoadingSkeleton = () => (
 export default function CommunityPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { data: session, status: authStatus } = useSession();
+  const { status: authStatus } = useSession();
   
   // Parse page from URL or default to 1
-  const currentPage = useMemo(() => 
-    parseInt(searchParams.get("page") || "1"), [searchParams]);
+  const currentPage = useMemo(() => {
+    return parseInt(searchParams.get("page") || "1");
+  }, [searchParams]);
 
   // State management
   const [threads, setThreads] = useState<CommunityThread[]>([]);
@@ -115,11 +116,13 @@ export default function CommunityPage() {
   const isAuthenticated = authStatus === "authenticated";
 
   // Memoized values
-  const hasThreads = useMemo(() => threads.length > 0, [threads]);
-  const showEmptyState = useMemo(() => 
-    !isLoading && !error && !hasThreads, 
-    [isLoading, error, hasThreads]
-  );
+  const hasThreads = useMemo(() => {
+    return threads.length > 0;
+  }, [threads]);
+
+  const showEmptyState = useMemo(() => {
+    return !isLoading && !error && !hasThreads;
+  }, [isLoading, error, hasThreads]);
 
   // Fetch threads with proper error handling
   const fetchThreads = useCallback(async (page: number, isRefresh = false) => {

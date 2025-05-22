@@ -1,5 +1,12 @@
 import prisma from '../prisma';
-import { Aircraft } from '@prisma/client';
+
+interface Aircraft {
+  id: number;
+  name: string;
+  slug: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
 
 export const getAllAircraft = async (): Promise<Aircraft[]> => {
   return prisma.aircraft.findMany({

@@ -11,18 +11,19 @@ export async function processUploadedFile(
   fileName: string
 ): Promise<{ questions: QuestionData[]; errors: string[] }> {
   try {
-    let fileContent: ArrayBuffer;
+    let fileContent: Uint8Array;
     
-    // Convert file to ArrayBuffer if it's a File
+    // Convert file to Uint8Array if it's a File
     if (file instanceof File) {
-      fileContent = await file.arrayBuffer();
+      const buffer = await file.arrayBuffer();
+      fileContent = new Uint8Array(buffer);
     } else if (file instanceof Buffer) {
-      fileContent = file.buffer.slice(
+      fileContent = new Uint8Array(file.buffer.slice(
         file.byteOffset,
         file.byteOffset + file.byteLength
-      );
+      ));
     } else {
-      fileContent = file;
+      fileContent = new Uint8Array(file);
     }
     
     // Check if the file has a .txt extension

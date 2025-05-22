@@ -1,7 +1,7 @@
 // src/app/(dashboard)/profile/page.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,7 +43,7 @@ export default function ProfilePage() {
   ];
 
   // Load user data
-  const fetchUserProfile = async () => {
+  const fetchUserProfile = useCallback(async () => {
     try {
       setIsLoading(true);
       const response = await fetch("/api/user/profile");
@@ -67,13 +67,13 @@ export default function ProfilePage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
     if (session?.user) {
       fetchUserProfile();
     }
-  }, [session, toast]);
+  }, [session, toast, fetchUserProfile]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

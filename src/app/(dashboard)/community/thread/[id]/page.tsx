@@ -7,7 +7,6 @@ import Link from "next/link";
 import { ChevronLeft, Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { useCommunityPermissions } from "@/hooks/useCommunityPermissions";
 import ThreadAccessGate from "@/components/user/community/ThreadAccessGate";
 import { CommunityThread } from "@/types/community";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -50,7 +49,9 @@ export default function ThreadDetailPage({ params }: ThreadDetailPageProps) {
   // const { loading: permissionsLoading } = useCommunityPermissions();
 
   // Check if ID is valid
-  const isValidId = useMemo(() => !isNaN(id) && id > 0, [id]);
+  const isValidId = useMemo(() => {
+    return !isNaN(id) && id > 0;
+  }, [id]);
 
   // Fetch thread with useCallback for better performance
   const fetchThread = useCallback(async (isRetry = false) => {
@@ -101,14 +102,57 @@ export default function ThreadDetailPage({ params }: ThreadDetailPageProps) {
 
   // Effect to fetch thread data
   useEffect(() => {
+    let isActive = true;
+    const controller = new AbortController();
+
     const fetchData = async () => {
-      await fetchThread(); // Call the async function
+      if (!isValidId) {
+        setError("Invalid thread ID");
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        const response = await fetch(`/api/community/threads/${id}`, {
+          signal: controller.signal,
+          cache: 'default'
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(
+            response.status === 404
+              ? "Thread not found"
+              : errorData.error || "Failed to fetch thread"
+          );
+        }
+
+        const data = await response.json();
+        if (isActive) {
+          setThread(data);
+        }
+      } catch (err) {
+        if (!(err instanceof DOMException && err.name === 'AbortError') && isActive) {
+          console.error("Error fetching thread:", err);
+          setError(err instanceof Error ? err.message : "Failed to load thread");
+        }
+      } finally {
+        if (isActive) {
+          setIsLoading(false);
+        }
+      }
     };
 
-    fetchData(); // Invoke the async function
+    fetchData();
 
-    // No cleanup function needed here, so just return nothing
-  }, [fetchThread]);
+    return () => {
+      isActive = false;
+      controller.abort();
+    };
+  }, [id, isValidId]);
 
   // Retry handler
   const handleRetry = useCallback(() => {

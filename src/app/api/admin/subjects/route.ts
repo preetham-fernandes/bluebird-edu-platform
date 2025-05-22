@@ -2,6 +2,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db/prisma';
 
+// Define the filter type
+type SubjectFilter = {
+  aircraftId?: number;
+  testTypeId?: number;
+};
+
+interface TitleWithTests {
+  id: number;
+  name: string;
+  slug: string;
+  aircraftId: number;
+  testTypeId: number;
+  createdAt: Date;
+  updatedAt: Date;
+  tests: Array<{
+    id: number;
+    isActive: boolean;
+  }>;
+}
+
 // GET endpoint to retrieve subjects (titles)
 export async function GET(request: NextRequest) {
   try {
@@ -18,7 +38,7 @@ export async function GET(request: NextRequest) {
     }
     
     // Build query filter
-    const filter: any = {};
+    const filter: SubjectFilter = {};
     
     if (aircraftId) {
       const aircraftIdNum = parseInt(aircraftId);
@@ -58,7 +78,7 @@ export async function GET(request: NextRequest) {
     });
     
     // Format the response
-    const formattedSubjects = subjects.map(subject => ({
+    const formattedSubjects = subjects.map((subject: TitleWithTests) => ({
       id: subject.id,
       name: subject.name,
       aircraftId: subject.aircraftId,

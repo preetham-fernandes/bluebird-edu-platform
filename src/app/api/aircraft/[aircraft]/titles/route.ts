@@ -1,4 +1,3 @@
-// src/app/api/aircraft/[aircraft]/titles/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import * as titleService from '@/lib/services/titleService';
 
@@ -26,4 +25,4 @@ export async function GET(
       { status: 500 }
     );
   }
-}
+} 

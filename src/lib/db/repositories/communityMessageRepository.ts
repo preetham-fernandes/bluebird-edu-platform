@@ -1,13 +1,37 @@
 // src/lib/db/repositories/communityMessageRepository.ts
 import prisma from '../prisma';
-import { CommunityMessage } from '@prisma/client';
+
+interface CommunityMessage {
+  id: number;
+  content: string;
+  userId: number;
+  parentId?: number | null;
+  isDeleted: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface User {
+  id: number;
+  name: string | null;
+  username: string | null;
+  avatarChoice: string | null;
+}
+
+interface MessageWithUser extends CommunityMessage {
+  user: User;
+  _count?: {
+    replies: number;
+  };
+  replies?: MessageWithUser[];
+}
 
 // Get messages with pagination
 export const getMessages = async (
   page: number = 1,
   limit: number = 20,
   parentId: number | null = null
-): Promise<{ messages: any[]; totalCount: number }> => {
+): Promise<{ messages: MessageWithUser[]; totalCount: number }> => {
   const skip = (page - 1) * limit;
   
   // Get total count for pagination
@@ -50,7 +74,7 @@ export const getMessages = async (
 };
 
 // Get a single message with its replies
-export const getMessageWithReplies = async (messageId: number): Promise<any | null> => {
+export const getMessageWithReplies = async (messageId: number): Promise<MessageWithUser | null> => {
   const message = await prisma.communityMessage.findUnique({
     where: { 
       id: messageId,
@@ -112,17 +136,25 @@ export const deleteMessage = async (id: number): Promise<CommunityMessage> => {
   });
 };
 
+interface MessageReport {
+  id: number;
+  messageId: number;
+  reporterId: number;
+  reason: string;
+  createdAt: Date;
+}
+
 // Report a message
 export const reportMessage = async (
   messageId: number,
   reporterId: number,
   reason?: string
-): Promise<any> => {
+): Promise<MessageReport> => {
   return prisma.messageReport.create({
     data: {
       messageId,
       reporterId,
-      reason: reason || null
+      reason: reason || 'No reason provided'
     }
   });
 };
