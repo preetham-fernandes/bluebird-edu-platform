@@ -2,13 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Upload, FileText, AlertTriangle, Download, FileDown } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Upload, FileText, AlertTriangle, Download } from 'lucide-react';
 
 interface FileUploaderProps {
   selectedFile: File | null;
@@ -233,19 +227,19 @@ export default function FileUploader({
           <p className="mt-2">Example formats:</p>
           <pre className="bg-muted p-2 rounded-md text-xs overflow-x-auto mb-2">
             <span className="font-semibold">Standard Question (with explanation):</span>
-            1,"What is the maximum operating altitude?","40,000 ft","41,000 ft","43,000 ft","39,000 ft",B,"The maximum operating altitude is 41,000 feet."
+            1,&quot;What is the maximum operating altitude?&quot;,&quot;40,000 ft&quot;,&quot;41,000 ft&quot;,&quot;43,000 ft&quot;,&quot;39,000 ft&quot;,B,&quot;The maximum operating altitude is 41,000 feet.&quot;
           </pre>
           <pre className="bg-muted p-2 rounded-md text-xs overflow-x-auto mb-2">
             <span className="font-semibold">Standard Question (without explanation):</span>
-            2,"With flaps 40 selected, what is the speedbrake restriction?","Speedbrake can be used fully","Must not go beyond ARMED detent","May be used at pilot's discretion","Use only during descent",B
+            2,&quot;With flaps 40 selected, what is the speedbrake restriction?&quot;,&quot;Speedbrake can be used fully&quot;,&quot;Must not go beyond ARMED detent&quot;,&quot;May be used at pilot's discretion&quot;,&quot;Use only during descent&quot;,B
           </pre>
           <pre className="bg-muted p-2 rounded-md text-xs overflow-x-auto mb-2">
             <span className="font-semibold">True/False Question (with explanation):</span>
-            3,"Intentional selection of reverse thrust in flight is prohibited.","True","False","","",A,"Selecting reverse thrust in flight is strictly prohibited."
+            3,&quot;Intentional selection of reverse thrust in flight is prohibited.&quot;,&quot;True&quot;,&quot;False&quot;,&quot;&quot;,&quot;&quot;,A,&quot;Selecting reverse thrust in flight is strictly prohibited.&quot;
           </pre>
           <pre className="bg-muted p-2 rounded-md text-xs overflow-x-auto">
             <span className="font-semibold">True/False Question (without explanation):</span>
-            4,"The minimum fuel tank temperature prior to takeoff is –43°C.","True","False","","",A
+            4,&quot;The minimum fuel tank temperature prior to takeoff is –43°C.&quot;,&quot;True&quot;,&quot;False&quot;,&quot;&quot;,&quot;&quot;,A
           </pre>
         </div>
       </div>

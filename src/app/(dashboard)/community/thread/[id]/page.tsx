@@ -47,7 +47,7 @@ export default function ThreadDetailPage({ params }: ThreadDetailPageProps) {
   const [error, setError] = useState<string | null>(null);
   const [isRetrying, setIsRetrying] = useState(false);
 
-  const { loading: permissionsLoading } = useCommunityPermissions();
+  // const { loading: permissionsLoading } = useCommunityPermissions();
 
   // Check if ID is valid
   const isValidId = useMemo(() => !isNaN(id) && id > 0, [id]);

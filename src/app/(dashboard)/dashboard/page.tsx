@@ -2,13 +2,12 @@
 "use client"
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
   import { 
     Book, 
     CheckCircle, 
     ClipboardList,
-    TrendingUp, CreditCard, AlertCircle
+    TrendingUp, AlertCircle
   } from "lucide-react";
   import Link from "next/link";
   import { ReactNode } from "react";
