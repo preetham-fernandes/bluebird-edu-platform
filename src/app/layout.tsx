@@ -18,6 +18,9 @@ const geistMono = localFont({
 export const metadata: Metadata = {
   title: "Bluebird Edu",
   description: "Mock test platform for pilot exam preparation",
+  icons: {
+    icon: "/bluebird-logo-white.svg",
+  },
 };
 
 export default function RootLayout({

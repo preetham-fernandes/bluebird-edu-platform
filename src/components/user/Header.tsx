@@ -2,6 +2,7 @@
 "use client";
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { signOut } from 'next-auth/react';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Button } from '@/components/ui/button';
@@ -13,7 +14,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { User, LogOut, Menu, Plane } from 'lucide-react';
+import { User, LogOut, Menu } from 'lucide-react';
+import { useTheme } from 'next-themes';
 
 interface HeaderProps {
   showMenuButton?: boolean;
@@ -21,6 +23,8 @@ interface HeaderProps {
 }
 
 export default function Header({ showMenuButton = false, onMenuClick }: HeaderProps) {
+  const { theme } = useTheme();
+
   return (
     <header className="h-16 border-b border-border bg-card flex items-center justify-between px-3 md:px-6 sticky top-0 z-30">
       <div className="flex items-center gap-2">
@@ -32,7 +36,13 @@ export default function Header({ showMenuButton = false, onMenuClick }: HeaderPr
         )}
         
         <Link href="/dashboard" className="font-bold text-lg md:text-xl text-primary flex items-center gap-2">
-        <Plane className="h-6 w-6 text-primary" />
+          <Image
+            src="/bluebird-logo-white.svg"
+            alt="Logo"
+            width={40}
+            height={40}
+            style={theme === 'light' ? { filter: 'invert(1) sepia(1) saturate(5) hue-rotate(180deg)' } : {}}
+          />
           <span>BlueBird-Edu</span>
         </Link>
       </div>

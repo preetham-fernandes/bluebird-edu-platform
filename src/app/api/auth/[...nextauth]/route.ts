@@ -75,7 +75,7 @@ const customAdapter = {
 };
 
 const authOptions: NextAuthOptions = {
-  debug: true, // Set to false in production
+  debug: false, // Set to false in production
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   adapter: customAdapter as any,
   providers: [

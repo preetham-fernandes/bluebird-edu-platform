@@ -3,10 +3,11 @@
 import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
-import { PlaneLanding, Menu, X } from "lucide-react"
+import { Menu, X } from "lucide-react"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
 import { useMagneticHover } from "@/hooks/use-magnetic-hover"
+import Image from 'next/image';
 
 export function Header() {
   const [scrolled, setScrolled] = useState(false)
@@ -62,7 +63,13 @@ export function Header() {
       <div className="container flex h-16 items-center justify-between mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center">
           <Link href="#" className="flex items-center space-x-2">
-            <PlaneLanding className="text-black"/>
+            <Image
+              src="/bluebird-logo-white.svg"
+              alt="Logo"
+              width={40}
+              height={40}
+              style={{ filter: 'invert(1) sepia(1) saturate(5) hue-rotate(180deg)' }}
+            />
             <span className="inline-block text-black text-xl md:text-3xl font-serif">Bluebird Edu</span>
           </Link>
         </div>
