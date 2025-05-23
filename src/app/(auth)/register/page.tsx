@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { AuthForm } from "@/components/auth/auth-form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useTheme } from 'next-themes';
+import Image from "next/image";
 
 interface RegisterFormData {
   name?: string;
@@ -17,6 +19,7 @@ interface RegisterFormData {
 export default function RegisterPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  const { theme } = useTheme();
 
   const onSubmit = async (data: RegisterFormData) => {
     try {
@@ -61,33 +64,57 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="container flex h-screen w-screen flex-col items-center justify-center">
-      <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
-        <div className="flex flex-col space-y-2 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight">
-            Create an account
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Enter your details to create your account
-          </p>
+    <div className="min-h-screen flex flex-col">
+      <div className="flex-1 flex items-center justify-center px-4 py-6 sm:px-6 lg:px-8">
+        <div className="w-full max-w-sm sm:max-w-md space-y-6 sm:space-y-8">
+          {/* Logo */}
+          <div className="flex justify-center">
+            <Image
+              src="/bluebird-logo-white.svg"
+              alt="Logo"
+              width={48}
+              height={48}
+              className="w-10 h-10 sm:w-12 sm:h-12"
+              style={theme === 'light' ? { filter: 'invert(1) sepia(1) saturate(5) hue-rotate(180deg)' } : {}}
+            />
+          </div>
+
+          {/* Header */}
+          <div className="text-center space-y-2">
+            <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">
+              Create an account
+            </h1>
+            <p className="text-sm sm:text-base text-muted-foreground px-2">
+              Enter your details to create your account
+            </p>
+          </div>
+
+          {/* Error Alert */}
+          {error && (
+            <Alert variant="destructive" className="mx-2 sm:mx-0">
+              <AlertDescription className="text-sm">
+                {error}
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Auth Form */}
+          <div className="px-2 sm:px-0">
+            <AuthForm type="register" onSubmit={onSubmit} />
+          </div>
+
+          {/* Footer Link */}
+          <div className="text-center px-4 sm:px-0">
+            <p className="text-sm sm:text-base text-muted-foreground">
+              <Link
+                href="/login"
+                className="hover:text-brand underline underline-offset-4 font-medium py-2 px-1 -m-1 inline-block"
+              >
+                Already have an account? Sign In
+              </Link>
+            </p>
+          </div>
         </div>
-
-        {error && (
-          <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-
-        <AuthForm type="register" onSubmit={onSubmit} />
-
-        <p className="px-8 text-center text-sm text-muted-foreground">
-          <Link
-            href="/login"
-            className="hover:text-brand underline underline-offset-4"
-          >
-            Already have an account? Sign In
-          </Link>
-        </p>
       </div>
     </div>
   );
