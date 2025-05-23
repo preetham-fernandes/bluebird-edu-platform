@@ -33,7 +33,7 @@ export const reportMessage = async (messageId: number, reporterId: number, reaso
 
 // Check if user has accepted community terms
 export const hasAcceptedTerms = async (userId: number) => {
-  const { prisma } = await import('../db/prisma');
+  const prisma = (await import('../db/prisma')).default;
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: { communityTermsAccepted: true }
@@ -44,7 +44,7 @@ export const hasAcceptedTerms = async (userId: number) => {
 
 // Accept community terms
 export const acceptTerms = async (userId: number) => {
-  const { prisma } = await import('../db/prisma');
+  const prisma = (await import('../db/prisma')).default;
   return prisma.user.update({
     where: { id: userId },
     data: { communityTermsAccepted: true }
@@ -53,7 +53,7 @@ export const acceptTerms = async (userId: number) => {
 
 // Update user avatar
 export const updateAvatar = async (userId: number, avatarChoice: string) => {
-  const { prisma } = await import('../db/prisma');
+  const prisma = (await import('../db/prisma')).default;
   return prisma.user.update({
     where: { id: userId },
     data: { avatarChoice }

@@ -16,7 +16,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   // Check authentication
-  const { loading, authenticated } = useAuth({ required: true });
+  const { loading, authenticated: _authenticated } = useAuth({ required: true });
   
   // Handle responsive behavior
   useEffect(() => {

@@ -3,7 +3,7 @@
 
 import { useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Calendar, MessageSquare, Loader2, Trash, Edit } from "lucide-react";
+import { Calendar, MessageSquare, Loader2, Trash } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -40,7 +40,7 @@ interface ThreadDetailProps {
 export default function ThreadDetail({ thread }: ThreadDetailProps) {
   const router = useRouter();
   const { toast } = useToast();
-  const { canReply, userId, isAuthor, canDelete } = useCommunityPermissions();
+  const { canReply, canDelete } = useCommunityPermissions();
 
   // State management with proper typing
   const [threadData, setThreadData] = useState<CommunityThread>(thread);

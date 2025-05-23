@@ -6,7 +6,7 @@ import { useSubscription } from "@/contexts/SubscriptionContext";
 
 export function useCommunityPermissions() {
   const { data: session, status } = useSession();
-  const { hasActiveSubscription, isLoading: subscriptionLoading } = useSubscription();
+  const { hasActiveSubscription, loading: subscriptionLoading } = useSubscription();
   
   const isAuthenticated = status === "authenticated";
   const loading = status === "loading" || subscriptionLoading;

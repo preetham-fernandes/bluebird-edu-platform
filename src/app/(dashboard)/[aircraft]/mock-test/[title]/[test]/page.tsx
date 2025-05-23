@@ -241,8 +241,8 @@ export default function MockTestPage() {
     return (
       <MockTestResults
         testId={testData.id}
-        aircraftSlug={formatParam(aircraft)}
-        testTitle={testData.title}
+        _aircraftSlug={formatParam(aircraft)}
+        _testTitle={testData.title}
         subject={testData.subject}
         questions={testData.questions}
         responses={responses}

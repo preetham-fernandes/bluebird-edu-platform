@@ -1,6 +1,11 @@
 // src/lib/services/aircraftService.ts
-import { Aircraft } from '@prisma/client';
 import * as aircraftRepository from '@/lib/db/repositories/aircraftRepository';
+
+export interface Aircraft {
+  id: number;
+  name: string;
+  slug: string;
+}
 
 // Get all active aircraft
 export const getAllAircraft = async (): Promise<Aircraft[]> => {

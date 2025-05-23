@@ -9,10 +9,11 @@ import TermsModal from "./TermsModal";
 import { Button } from "@/components/ui/button";
 import { Loader2, RefreshCw } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { CommunityMessage } from "@/types/community";
 
 export default function MessageList() {
   const { data: session, status } = useSession();
-  const [messages, setMessages] = useState<any[]>([]);
+  const [messages, setMessages] = useState<CommunityMessage[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -105,9 +106,10 @@ export default function MessageList() {
     fetchMessages(1, true);
   };
 
-  const handleMessageSubmit = (content: string) => {
+  const handleMessageSubmit = async (content: string) => {
     // After successful submission, refresh the messages
-    fetchMessages(1, true);
+    console.log('New message content:', content);
+    await fetchMessages(1, true);
   };
 
   const handleDeleteMessage = () => {
@@ -205,7 +207,7 @@ export default function MessageList() {
               content={message.content}
               user={message.user}
               createdAt={message.createdAt}
-              replyCount={message._count.replies}
+              replyCount={message._count?.replies ?? 0}
               onDelete={handleDeleteMessage}
               onReply={() => fetchMessages(page, true)}
             />

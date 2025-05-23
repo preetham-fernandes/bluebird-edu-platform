@@ -1,8 +1,10 @@
 // src/components/user/community/UserAvatar.tsx
-import { User } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import React from 'react';
 import { CommunityUser } from '@/types/community';
 import { getUserDisplayName } from '@/lib/utils/userDisplay';
+
+// Import avatar components - adjust path if needed
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface UserAvatarProps {
   user: CommunityUser;

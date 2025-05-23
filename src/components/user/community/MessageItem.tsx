@@ -6,7 +6,6 @@ import {
   ChevronDown,
   ChevronUp,
   MessageSquare,
-  ThumbsUp,
   Loader2,
 } from "lucide-react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -40,7 +39,7 @@ export default function MessageItem({
   onReplyAdded,
   onMessageDeleted,
 }: MessageItemProps) {
-  const { canReply, canUpvote } = useCommunityPermissions();
+  const { canReply } = useCommunityPermissions();
   
   // Memoize to avoid unnecessary re-renders
   const hasReplies = useMemo(() => message.replyCount > 0, [message.replyCount]);
@@ -177,7 +176,7 @@ export default function MessageItem({
                 <MessageActions
                   messageId={messageData.id}
                   userId={messageData.userId}
-                  onReply={handleReplyClick}
+                  _onReply={handleReplyClick}
                   onMessageDeleted={handleMessageDeleted}
                   isTopLevel={isTopLevel}
                 />

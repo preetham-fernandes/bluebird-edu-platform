@@ -15,7 +15,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   // Check admin authentication
-  const { loading, isAdmin } = useAdmin();
+  const { loading, isAdmin: _isAdmin } = useAdmin();
   
   // Handle responsive behavior
   useEffect(() => {

@@ -4,7 +4,7 @@ import { TestAttemptCreateInput } from '@/types/test';
 
 // Create a new test attempt
 export const createTestAttempt = async (data: TestAttemptCreateInput) => {
-  const { userId, testId, responses, score, timeTaken, testType } = data;
+  const { userId, testId, responses, score, timeTaken } = data;
   
   // First, create the test attempt
   const testAttempt = await prisma.testAttempt.create({

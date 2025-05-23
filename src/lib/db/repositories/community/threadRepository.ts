@@ -1,6 +1,5 @@
 // src/lib/db/repositories/community/threadRepository.ts
 import prisma from '@/lib/db/prisma';
-import { Prisma } from '@prisma/client';
 
 // Get all threads with pagination
 export const getThreads = async (

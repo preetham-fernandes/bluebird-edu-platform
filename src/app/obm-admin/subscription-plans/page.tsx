@@ -34,13 +34,11 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
-  PencilIcon, 
-  PlusIcon, 
-  TrashIcon, 
   Loader2,
-  CheckIcon,
-  XIcon,
-  AlertCircle
+  AlertCircle,
+  PlusIcon,
+  TrashIcon,
+  CheckIcon
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -67,7 +65,7 @@ interface SubscriptionPlan {
 }
 
 export default function SubscriptionPlansPage() {
-  const router = useRouter();
+  const _router = useRouter();
   const { toast } = useToast();
   
   // State
@@ -125,7 +123,7 @@ export default function SubscriptionPlansPage() {
   }, []);
   
   // Handle form change
-  const handleChange = (field: string, value: any) => {
+  const handleChange = (field: string, value: string | boolean | number) => {
     setFormData(prev => ({
       ...prev,
       [field]: value

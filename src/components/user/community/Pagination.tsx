@@ -28,7 +28,7 @@ export default function Pagination({
     
     // Calculate range of middle pages to show
     let startPage = Math.max(2, currentPage - Math.floor(MAX_VISIBLE_PAGES / 2));
-    let endPage = Math.min(totalPages - 1, startPage + MAX_VISIBLE_PAGES - 3);
+    const endPage = Math.min(startPage + MAX_VISIBLE_PAGES - 1, totalPages);
     
     // Adjust if at the ends
     if (endPage - startPage < MAX_VISIBLE_PAGES - 3) {

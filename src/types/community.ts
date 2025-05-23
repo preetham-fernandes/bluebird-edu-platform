@@ -41,6 +41,10 @@ export interface CommunityUser {
     replyCount: number;
     upvoteCount: number;
     isUpvoted?: boolean;
+    _count?: {
+      replies: number;
+      upvotes?: number;
+    };
   }
   
   // Upvote types

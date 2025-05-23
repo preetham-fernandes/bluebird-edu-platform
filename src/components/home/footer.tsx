@@ -1,7 +1,5 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-import { Plane } from "lucide-react"
 import Link from "next/link"
 import { motion } from "framer-motion"
 
@@ -46,7 +44,7 @@ export function Footer() {
             <div>
               <h3 className="text-lg font-semibold">Disclaimer</h3>
               <p className="text-black-400 mb-2">
-              The material on this site is for training purposes only. Do not use it for flight! <br/><br/>Please note that <a className="text-blue-600" href="https://bluebirdedu.com">bluebirdedu.com</a> is not affiliated in any way with any airplane manufacturer Company.
+              The material on this site is for training purposes only. Do not use it for flight! <br/><br/>Please note that <a className="text-blue-600" href="https://bluebirdedu.com">bluebirdedu.com</a> is not affiliated in any way with any airplane manufacturer Company.
               </p>
             </div>
           </div>

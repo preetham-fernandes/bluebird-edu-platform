@@ -44,7 +44,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
   }
 
   export default function DashboardPage() {
-    const { hasActiveSubscription, isLoading } = useSubscription();
+    const { hasActiveSubscription, loading } = useSubscription();
 
     return (
       <div className="space-y-6">
@@ -55,7 +55,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
           </p>
         </div>
 
-        {!isLoading && !hasActiveSubscription && (
+        {!loading && !hasActiveSubscription && (
         <Alert>
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>

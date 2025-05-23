@@ -31,7 +31,6 @@ import {
   DialogFooter,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
 import ReportModal from "../user/community/ReportModal";
 
 interface MessageProps {
@@ -95,7 +94,7 @@ export default function Message({
       }
 
       setConfirmDelete(false);
-    } catch (error) {
+    } catch (_error) {
       toast({
         variant: "destructive",
         title: "Error",
@@ -105,6 +104,7 @@ export default function Message({
   };
 
   const handleReply = (newContent: string) => {
+    console.log('Reply content:', newContent);
     setIsReplying(false);
     if (onReply) {
       onReply();

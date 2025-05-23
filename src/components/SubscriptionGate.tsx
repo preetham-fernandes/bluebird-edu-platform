@@ -16,10 +16,10 @@ interface SubscriptionGateProps {
 }
 
 export function SubscriptionGate({ moduleType, moduleId, children, fallback }: SubscriptionGateProps) {
-  const { isLoading, checkModuleAccess } = useSubscription();
+  const { loading, checkModuleAccess } = useSubscription();
   const router = useRouter();
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="w-full py-12 flex justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />

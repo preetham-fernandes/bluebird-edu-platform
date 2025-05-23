@@ -1,33 +1,31 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { 
   Card, 
   CardContent, 
-  CardDescription, 
-  CardFooter, 
+  CardDescription,
+  CardFooter,
   CardHeader, 
   CardTitle 
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { 
   ArrowLeft, 
   ArrowRight, 
   Plane, 
   BookOpen, 
   Upload,
-  Plus,
   AlertCircle,
   CheckCircle,
   Loader2
 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import AircraftSelector from "@/components/admin/bulk-upload/AircraftSelector";
-import TestTypeSelector from "@/components/admin/bulk-upload/TestTypeSelector";
-import SubjectSelector from "@/components/admin/bulk-upload/SubjectSelector";
-import FileUploader from "@/components/admin/bulk-upload/FileUploader";
-import UploadSummary from "@/components/admin/bulk-upload/UploadSummary";
+import AircraftSelector from '@/components/admin/bulk-upload/AircraftSelector';
+import TestTypeSelector from '@/components/admin/bulk-upload/TestTypeSelector';
+import SubjectSelector from '@/components/admin/bulk-upload/SubjectSelector';
+import FileUploader from '@/components/admin/bulk-upload/FileUploader';
+import UploadSummary from '@/components/admin/bulk-upload/UploadSummary';
 
 const steps = [
   { id: 'aircraft', title: 'Select Aircraft', icon: <Plane className="h-5 w-5" /> },
@@ -41,7 +39,7 @@ export default function BulkUploadPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
+  const [_success, setSuccess] = useState(false);
   
   // Form state
   const [selectedAircraft, setSelectedAircraft] = useState<{id: number, name: string} | null>(null);

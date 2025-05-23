@@ -78,3 +78,7 @@ export async function getAuthenticatedUserId(request: NextRequest): Promise<{
     )
   };
 }
+
+export async function getServerAuthSession(_request: NextRequest) {
+  // ... existing code ...
+}

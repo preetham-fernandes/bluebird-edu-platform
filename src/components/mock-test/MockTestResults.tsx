@@ -21,14 +21,13 @@ import {
   AlertTriangle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { TestQuestion } from '@/types/test';
 import { cn } from '@/lib/utils';
 
 interface MockTestResultsProps {
   testId: number;
-  aircraftSlug: string;
-  testTitle: string;
+  _aircraftSlug: string;
+  _testTitle: string;
   subject: string;
   questions: TestQuestion[];
   responses: Record<number, string>;
@@ -39,8 +38,8 @@ interface MockTestResultsProps {
 }
 
 export default function MockTestResults({
-  aircraftSlug,
-  testTitle,
+  _aircraftSlug,
+  _testTitle,
   subject,
   questions,
   responses,

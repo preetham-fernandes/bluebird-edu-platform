@@ -18,12 +18,12 @@ interface UserData {
   profileImg?: string;
 }
 
-interface CredentialsType {
+interface _CredentialsType {
   email: string;
   password: string;
 }
 
-interface GoogleProfile {
+interface _GoogleProfile {
   email: string;
   name?: string;
   picture?: string;
@@ -154,8 +154,8 @@ const authOptions: NextAuthOptions = {
     strategy: "jwt",
   },
   callbacks: {
-    async signIn({ user }) {
-        return true;
+    async signIn({ user: _user }) {
+      return true;
     },
     async session({ session, token }) {
       if (token) {

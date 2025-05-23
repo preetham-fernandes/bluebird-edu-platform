@@ -1,37 +1,65 @@
 // src/contexts/SubscriptionContext.tsx
 'use client';
 
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
 
 interface SubscribedModule {
   type: string;
   id: number;
 }
 
+interface SubscriptionData {
+  id: number;
+  planId: number;
+  startDate: string;
+  endDate: string;
+  status: string;
+  plan: {
+    name: string;
+    displayName: string;
+    moduleType: string;
+    moduleId: number;
+  };
+}
+
+interface Subscription {
+  id: number;
+  status: string;
+  endDate: string;
+  plan: {
+    moduleType: string;
+    moduleId: number;
+  };
+}
+
 interface SubscriptionContextType {
-  isLoading: boolean;
   hasActiveSubscription: boolean;
-  subscribedModules: SubscribedModule[];
+  subscriptionData: SubscriptionData | null;
+  loading: boolean;
+  error: Error | null;
+  refreshSubscription: () => Promise<void>;
   checkModuleAccess: (moduleType: string, moduleId: number) => boolean;
-  refreshSubscriptionStatus: () => Promise<void>;
 }
 
 const SubscriptionContext = createContext<SubscriptionContextType>({
-  isLoading: true,
   hasActiveSubscription: false,
-  subscribedModules: [],
+  subscriptionData: null,
+  loading: true,
+  error: null,
+  refreshSubscription: async () => {},
   checkModuleAccess: () => false,
-  refreshSubscriptionStatus: async () => {},
 });
 
 export function SubscriptionProvider({ children }: { children: ReactNode }) {
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
+  const [subscriptionData, _setSubscriptionData] = useState<SubscriptionData | null>(null);
+  const [error, _setError] = useState<Error | null>(null);
   const [subscribedModules, setSubscribedModules] = useState<SubscribedModule[]>([]);
 
   const fetchSubscriptionStatus = async () => {
     try {
-      setIsLoading(true);
+      setLoading(true);
       const response = await fetch('/api/user/subscriptions');
       
       if (!response.ok) {
@@ -41,15 +69,15 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
         return;
       }
       
-      const subscriptions = await response.json();
+      const subscriptions: Subscription[] = await response.json();
       
       // Filter to only active subscriptions
-      const activeSubscriptions = subscriptions.filter((sub: any) => 
+      const activeSubscriptions = subscriptions.filter(sub => 
         sub.status === 'active' && new Date(sub.endDate) > new Date()
       );
       
       // Extract modules from active subscriptions
-      const modules = activeSubscriptions.map((sub: any) => ({
+      const modules = activeSubscriptions.map(sub => ({
         type: sub.plan.moduleType,
         id: sub.plan.moduleId
       }));
@@ -62,7 +90,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       setHasActiveSubscription(false);
       setSubscribedModules([]);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
@@ -70,20 +98,21 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     fetchSubscriptionStatus();
   }, []);
 
-  const checkModuleAccess = (moduleType: string, moduleId: number) => {
+  const _checkModuleAccess = useCallback((moduleType: string, moduleId: number) => {
     return subscribedModules.some(
       module => module.type === moduleType && module.id === moduleId
     );
-  };
+  }, [subscribedModules]);
 
   return (
     <SubscriptionContext.Provider
       value={{
-        isLoading,
+        loading,
         hasActiveSubscription,
-        subscribedModules,
-        checkModuleAccess,
-        refreshSubscriptionStatus: fetchSubscriptionStatus,
+        subscriptionData,
+        error,
+        refreshSubscription: fetchSubscriptionStatus,
+        checkModuleAccess: _checkModuleAccess
       }}
     >
       {children}

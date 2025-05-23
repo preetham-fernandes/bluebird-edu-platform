@@ -50,7 +50,6 @@ export async function POST(request: NextRequest) {
     const fileBuffer = await file.arrayBuffer();
     const fileName = file.name.toLowerCase();
     
-    let questions;
     if (!fileName.endsWith('.txt')) {
       return NextResponse.json(
         { error: 'Unsupported file format. Only .txt files are supported.' },
@@ -59,7 +58,7 @@ export async function POST(request: NextRequest) {
     }
     
     const txtText = new TextDecoder().decode(fileBuffer);
-    questions = await parseTxtFile(txtText);
+    const questions = await parseTxtFile(txtText);
 
     // First, deactivate any existing active tests for this title
     await prisma.test.updateMany({

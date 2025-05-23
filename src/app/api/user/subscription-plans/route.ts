@@ -1,5 +1,5 @@
 // src/app/api/user/subscription-plans/route.ts
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import prisma from '@/lib/db/prisma';
 
 // GET - Fetch all active subscription plans for users

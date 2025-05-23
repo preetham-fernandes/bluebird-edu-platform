@@ -2,9 +2,6 @@
 "use client";
 
 import {
-  AlertCircle,
-  Edit,
-  MessageSquare,
   MoreHorizontal,
   Trash,
   Flag,
@@ -13,7 +10,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
@@ -36,7 +32,7 @@ import ReportModal from "./ReportModal";
 interface MessageActionsProps {
   messageId: number;
   userId: number;
-  onReply?: () => void;
+  _onReply?: () => void;
   onMessageDeleted?: () => void;
   isTopLevel?: boolean;
 }
@@ -44,7 +40,7 @@ interface MessageActionsProps {
 export default function MessageActions({
   messageId,
   userId,
-  onReply,
+  _onReply,
   onMessageDeleted,
   isTopLevel = false,
 }: MessageActionsProps) {
@@ -100,6 +96,10 @@ export default function MessageActions({
 
   const handleReport = () => {
     setShowReportModal(true);
+  };
+
+  const _handleReply = (_onReply: () => void) => {
+    // ... existing code ...
   };
 
   return (

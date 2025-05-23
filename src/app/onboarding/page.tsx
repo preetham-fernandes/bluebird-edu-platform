@@ -22,7 +22,7 @@ import {
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const { data: session, update } = useSession();
+  const { data: _session, update } = useSession();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   

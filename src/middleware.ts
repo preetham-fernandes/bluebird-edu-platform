@@ -36,7 +36,7 @@ export async function middleware(request: NextRequest) {
   ];
   
   // Check if the current route is public
-  const isPublicRoute = publicRoutes.some(route => 
+  const _isPublicRoute = publicRoutes.some(route => 
     pathname === route || 
     pathname.startsWith("/api/auth/") ||
     pathname.startsWith("/_next/") ||

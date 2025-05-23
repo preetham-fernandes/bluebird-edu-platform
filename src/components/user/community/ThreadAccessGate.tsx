@@ -3,9 +3,9 @@
 
 import { useSession } from "next-auth/react";
 import { CommunityThread } from "@/types/community";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { LogIn, Lock } from "lucide-react";
+import { LogIn } from "lucide-react";
 import Link from "next/link";
 import ThreadDetail from "./ThreadDetail";
 

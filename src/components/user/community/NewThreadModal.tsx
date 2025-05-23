@@ -51,7 +51,7 @@ interface NewThreadModalProps {
 
 export default function NewThreadModal({ isOpen, onClose }: NewThreadModalProps) {
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: _session } = useSession();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   

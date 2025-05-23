@@ -4,7 +4,7 @@ import { getServerSession } from 'next-auth';
 import prisma from '@/lib/db/prisma';
 
 // GET endpoint to check if user has accepted terms
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const session = await getServerSession();
     
@@ -23,10 +23,10 @@ export async function GET(request: NextRequest) {
     const userId = session.user.id;
     
     // If we still don't have a user ID, try to find the user by email
-    let user;
+    let _user;
     if (userId) {
       // Find by ID if available
-      user = await prisma.user.findUnique({
+      _user = await prisma.user.findUnique({
         where: { 
           id: parseInt(userId) 
         },
@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
       });
     } else if (session.user.email) {
       // Fallback to finding by email
-      user = await prisma.user.findUnique({
+      _user = await prisma.user.findUnique({
         where: { 
           email: session.user.email 
         },
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
       });
     }
     
-    const hasAccepted = user?.communityTermsAccepted || false;
+    const hasAccepted = _user?.communityTermsAccepted || false;
     
     return NextResponse.json({ hasAccepted });
   } catch (error) {
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
 }
 
 // POST endpoint to accept terms
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
     const session = await getServerSession();
     
@@ -68,18 +68,18 @@ export async function POST(request: NextRequest) {
     }
     
     // Get user ID from the session or find by email
-    let user;
+    let _user;
     const userId = session.user.id;
     
     if (userId) {
       // Update by ID if available
-      user = await prisma.user.update({
+      _user = await prisma.user.update({
         where: { id: parseInt(userId) },
         data: { communityTermsAccepted: true }
       });
     } else if (session.user.email) {
       // Fallback to updating by email
-      user = await prisma.user.update({
+      _user = await prisma.user.update({
         where: { email: session.user.email },
         data: { communityTermsAccepted: true }
       });

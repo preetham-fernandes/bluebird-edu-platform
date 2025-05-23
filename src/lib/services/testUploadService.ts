@@ -1,7 +1,6 @@
 // src/lib/services/testUploadService.ts
-import { PrismaClient } from '@prisma/client';
 import { QuestionData } from '../fileProcessing/textParser';
-import prisma from '../db/prisma';
+import prisma from '@/lib/db/prisma';
 
 /**
  * Interface for the test upload request

@@ -48,7 +48,7 @@ interface UserSubscription {
 }
 
 export default function SubscriptionsPage() {
-  const { data: session, status: sessionStatus } = useSession();
+  const { data: _session, status: sessionStatus } = useSession();
   const router = useRouter();
   const { toast } = useToast();
   
