@@ -101,7 +101,7 @@ export default function BulkUploadPage() {
         formData.append('timeLimit', '60'); // Example: 60 minutes, adjust as needed
       }
 
-      const response = await fetch('/api/admin/tests/upload', {
+      const response = await fetch('/api/admin/bulk-upload', {
         method: 'POST',
         body: formData,
       });
