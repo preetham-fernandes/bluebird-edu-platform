@@ -1,7 +1,8 @@
+//app/(dashboard)/[aircraft]/practice-test/page.tsx
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, usePathname } from 'next/navigation';
 import { 
   Card, 
   CardContent, 
@@ -19,12 +20,14 @@ import Link from 'next/link';
 interface Subject {
   id: number;
   name: string;
+  slug: string;
   testCount: number;
 }
 
 export default function PracticeTestSubjectsPage() {
   const router = useRouter();
   const params = useParams();
+  const pathname = usePathname();
   const { aircraft } = params;
   
   const [subjects, setSubjects] = useState<Subject[]>([]);
@@ -34,6 +37,14 @@ export default function PracticeTestSubjectsPage() {
   // Function to format URL parameters
   const formatParam = (param: string | string[]) => 
     Array.isArray(param) ? param[0] : param;
+  
+  // Extract test type from URL path
+  const getTestTypeFromPath = () => {
+    // pathname will be something like "/boeing-737-max/practice-test"
+    const pathSegments = pathname.split('/');
+    const testTypeSegment = pathSegments[pathSegments.length - 1]; // Gets "practice-test"
+    return testTypeSegment;
+  };
   
   // Format the aircraft for display
   const formattedAircraft = formatParam(aircraft)
@@ -49,26 +60,39 @@ export default function PracticeTestSubjectsPage() {
     const fetchSubjects = async () => {
       try {
         setLoading(true);
+        setError(null);
         
-        // Fetch subjects from the API
-        const response = await fetch(`/api/titles?aircraft=${formatParam(aircraft)}&testType=practice`);
+        const aircraftParam = formatParam(aircraft);
+        const testType = getTestTypeFromPath(); // This will be "practice-test"
+        
+        console.log('Fetching subjects for:', { aircraftParam, testType });
+        
+        // Use the correct API endpoint with path parameters
+        const apiUrl = `/api/titles/${aircraftParam}/${testType}`;
+        console.log('API URL:', apiUrl);
+        
+        const response = await fetch(apiUrl);
         
         if (!response.ok) {
-          throw new Error('Failed to fetch subjects');
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || `HTTP ${response.status}: Failed to fetch subjects`);
         }
         
         const data = await response.json();
+        console.log('API Response:', data);
         setSubjects(data);
       } catch (err) {
         console.error('Error fetching subjects:', err);
-        setError('Failed to load subjects. Please try again later.');
+        setError(err instanceof Error ? err.message : 'Failed to load subjects. Please try again later.');
       } finally {
         setLoading(false);
       }
     };
     
-    fetchSubjects();
-  }, [aircraft]);
+    if (aircraft) {
+      fetchSubjects();
+    }
+  }, [aircraft, pathname]);
   
   const goBack = () => {
     router.push(`/dashboard`);
@@ -104,11 +128,34 @@ export default function PracticeTestSubjectsPage() {
   
   if (error) {
     return (
-      <Alert variant="destructive">
-        <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Error</AlertTitle>
-        <AlertDescription>{error}</AlertDescription>
-      </Alert>
+      <div className="space-y-4">
+        <div className="flex items-center space-x-4">
+          <Button variant="outline" size="icon" onClick={goBack}>
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <h1 className="text-xl md:text-2xl font-bold tracking-tight">
+            {formattedAircraft} Practice Tests
+          </h1>
+        </div>
+        
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error Loading Subjects</AlertTitle>
+          <AlertDescription>
+            {error}
+            <br />
+            <br />
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => window.location.reload()}
+              className="mt-2"
+            >
+              Try Again
+            </Button>
+          </AlertDescription>
+        </Alert>
+      </div>
     );
   }
   
@@ -134,6 +181,16 @@ export default function PracticeTestSubjectsPage() {
           <AlertTitle>No Practice Tests Available</AlertTitle>
           <AlertDescription>
             There are no practice tests available for {formattedAircraft} at this time.
+            <br />
+            <br />
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => window.location.reload()}
+              className="mt-2"
+            >
+              Refresh
+            </Button>
           </AlertDescription>
         </Alert>
       ) : (

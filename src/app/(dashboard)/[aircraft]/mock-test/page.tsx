@@ -1,7 +1,8 @@
+//app/(dashboard)/[aircraft]/mock-test/page.tsx
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, usePathname } from 'next/navigation';
 import { 
   Card, 
   CardContent, 
@@ -12,19 +13,21 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AlertCircle, BookOpen, ArrowLeft, Clock } from "lucide-react";
+import { AlertCircle, Clock, ArrowLeft } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import Link from 'next/link';
 
 interface Subject {
   id: number;
   name: string;
+  slug: string;
   testCount: number;
 }
 
 export default function MockTestSubjectsPage() {
   const router = useRouter();
   const params = useParams();
+  const pathname = usePathname();
   const { aircraft } = params;
   
   const [subjects, setSubjects] = useState<Subject[]>([]);
@@ -34,6 +37,14 @@ export default function MockTestSubjectsPage() {
   // Function to format URL parameters
   const formatParam = (param: string | string[]) => 
     Array.isArray(param) ? param[0] : param;
+  
+  // Extract test type from URL path
+  const getTestTypeFromPath = () => {
+    // pathname will be something like "/boeing-737-max/mock-test"
+    const pathSegments = pathname.split('/');
+    const testTypeSegment = pathSegments[pathSegments.length - 1]; // Gets "mock-test"
+    return testTypeSegment;
+  };
   
   // Format the aircraft for display
   const formattedAircraft = formatParam(aircraft)
@@ -49,28 +60,42 @@ export default function MockTestSubjectsPage() {
     const fetchSubjects = async () => {
       try {
         setLoading(true);
+        setError(null);
         
-        const response = await fetch(`/api/titles?aircraft=${formatParam(aircraft)}&testType=mock`);
+        const aircraftParam = formatParam(aircraft);
+        const testType = getTestTypeFromPath(); // This will be "mock-test"
+        
+        console.log('Fetching subjects for:', { aircraftParam, testType });
+        
+        // Use the correct API endpoint with path parameters
+        const apiUrl = `/api/titles/${aircraftParam}/${testType}`;
+        console.log('API URL:', apiUrl);
+        
+        const response = await fetch(apiUrl);
         
         if (!response.ok) {
-          throw new Error('Failed to fetch subjects');
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || `HTTP ${response.status}: Failed to fetch subjects`);
         }
         
         const data = await response.json();
+        console.log('API Response:', data);
         setSubjects(data);
       } catch (err) {
         console.error('Error fetching subjects:', err);
-        setError('Failed to load subjects. Please try again later.');
+        setError(err instanceof Error ? err.message : 'Failed to load subjects. Please try again later.');
       } finally {
         setLoading(false);
       }
     };
     
-    fetchSubjects();
-  }, [aircraft]);
+    if (aircraft) {
+      fetchSubjects();
+    }
+  }, [aircraft, pathname]);
   
   const goBack = () => {
-    router.push(`/${formatParam(aircraft)}/test-type`);
+    router.push(`/dashboard`);
   };
   
   if (loading) {
@@ -103,11 +128,34 @@ export default function MockTestSubjectsPage() {
   
   if (error) {
     return (
-      <Alert variant="destructive">
-        <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Error</AlertTitle>
-        <AlertDescription>{error}</AlertDescription>
-      </Alert>
+      <div className="space-y-4">
+        <div className="flex items-center space-x-4">
+          <Button variant="outline" size="icon" onClick={goBack}>
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <h1 className="text-xl md:text-2xl font-bold tracking-tight">
+            {formattedAircraft} Mock Tests
+          </h1>
+        </div>
+        
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error Loading Subjects</AlertTitle>
+          <AlertDescription>
+            {error}
+            <br />
+            <br />
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => window.location.reload()}
+              className="mt-2"
+            >
+              Try Again
+            </Button>
+          </AlertDescription>
+        </Alert>
+      </div>
     );
   }
   
@@ -127,20 +175,22 @@ export default function MockTestSubjectsPage() {
         </p>
       </div>
       
-      <Alert className="bg-yellow-50 dark:bg-yellow-950 border-yellow-200 dark:border-yellow-800">
-        <Clock className="h-4 w-4 text-yellow-500 dark:text-yellow-400" />
-        <AlertTitle className="text-yellow-700 dark:text-yellow-300">Mock Test Information</AlertTitle>
-        <AlertDescription className="text-yellow-600 dark:text-yellow-400">
-          Mock tests simulate actual exam conditions with timed sessions. You'll see your results only after completing the full test.
-        </AlertDescription>
-      </Alert>
-      
       {subjects.length === 0 ? (
         <Alert>
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>No Mock Tests Available</AlertTitle>
           <AlertDescription>
             There are no mock tests available for {formattedAircraft} at this time.
+            <br />
+            <br />
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => window.location.reload()}
+              className="mt-2"
+            >
+              Refresh
+            </Button>
           </AlertDescription>
         </Alert>
       ) : (
@@ -149,7 +199,7 @@ export default function MockTestSubjectsPage() {
             <Card key={subject.id} className={subject.testCount === 0 ? "opacity-70" : ""}>
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <BookOpen className="h-5 w-5 mr-2 text-primary" />
+                  <Clock className="h-5 w-5 mr-2 text-primary" />
                   {subject.name}
                 </CardTitle>
                 <CardDescription>
@@ -161,7 +211,7 @@ export default function MockTestSubjectsPage() {
               <CardContent>
                 <p className="text-sm text-muted-foreground">
                   {subject.testCount > 0
-                    ? `Full-length mock exams for ${formattedAircraft} ${subject.name}`
+                    ? `Timed mock tests for ${formattedAircraft} ${subject.name}`
                     : "No mock tests available for this subject yet."}
                 </p>
               </CardContent>
@@ -172,7 +222,7 @@ export default function MockTestSubjectsPage() {
                     asChild
                   >
                     <Link href={`/${formatParam(aircraft)}/mock-test/${formatSubjectForUrl(subject.name)}`}>
-                      View Mock Tests
+                      Start Mock Test
                     </Link>
                   </Button>
                 ) : (
