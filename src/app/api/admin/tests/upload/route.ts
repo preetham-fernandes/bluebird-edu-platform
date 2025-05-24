@@ -1,7 +1,7 @@
 // src/app/api/admin/tests/upload/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { parseCsvFile, parseExcelFile, parseTxtFile } from '@/lib/fileProcessing/textParser';
-import { TestUploadService } from '@/lib/services/testUploadService';
+import prisma from '@/lib/db/prisma';
 
 export async function POST(request: NextRequest) {
   try {
@@ -77,26 +77,157 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Create the test using the service
+    console.log(`Starting upload of ${questions.length} questions`);
+
+    // Create the test using resilient approach (not TestUploadService)
     try {
-      const result = await TestUploadService.createTest({
-        title,
-        aircraftId: aircraftIdNum,
-        subjectId: subjectIdNum,
-        testTypeId: testTypeIdNum,
-        timeLimit: timeLimitNum,
-        questions,
+      // Step 1: Find the subject/title to validate it exists
+      const subject = await prisma.title.findFirst({
+        where: {
+          id: subjectIdNum,
+          aircraftId: aircraftIdNum,
+          testTypeId: testTypeIdNum,
+        },
       });
+
+      if (!subject) {
+        return NextResponse.json(
+          { error: 'Invalid subject, aircraft, or test type combination' },
+          { status: 400 }
+        );
+      }
+
+      // Step 2: Deactivate existing tests
+      console.log('Deactivating existing tests...');
+      await prisma.test.updateMany({
+        where: {
+          titleId: subject.id,
+          isActive: true,
+        },
+        data: {
+          isActive: false,
+        },
+      });
+
+      // Step 3: Create the new test
+      console.log('Creating new test...');
+      const test = await prisma.test.create({
+        data: {
+          title: title,
+          titleId: subject.id,
+          aircraftId: aircraftIdNum,
+          totalQuestions: questions.length,
+          timeLimit: timeLimitNum,
+          updatedBy: 1, // Admin ID
+          isActive: true,
+        },
+      });
+
+      console.log(`Created test with ID: ${test.id}`);
+
+      // Step 4: Process questions in small batches to avoid transaction timeouts
+      const BATCH_SIZE = 3; // Process only 3 questions at a time
+      let questionsUploaded = 0;
+      let errorsEncountered = 0;
+
+      for (let i = 0; i < questions.length; i += BATCH_SIZE) {
+        const batch = questions.slice(i, i + BATCH_SIZE);
+        const batchNumber = Math.floor(i / BATCH_SIZE) + 1;
+        const totalBatches = Math.ceil(questions.length / BATCH_SIZE);
+        
+        console.log(`Processing batch ${batchNumber}/${totalBatches} (questions ${i + 1}-${i + batch.length})`);
+        
+        try {
+          // Process each batch in its own transaction
+          await prisma.$transaction(async (tx) => {
+            for (let j = 0; j < batch.length; j++) {
+              const question = batch[j];
+              const questionNumber = i + j + 1;
+              
+              // Create the question
+              const createdQuestion = await tx.question.create({
+                data: {
+                  testId: test.id,
+                  questionNumber: questionNumber,
+                  questionText: question.text,
+                  correctAnswer: question.correctAnswer,
+                  explanation: question.explanation || null,
+                },
+              });
+
+              // Create options for this question
+              const isTrueFalseQuestion = question.options.length === 2;
+              
+              // Create the available options
+              for (const option of question.options) {
+                await tx.option.create({
+                  data: {
+                    questionId: createdQuestion.id,
+                    label: option.id,
+                    optionText: option.text,
+                    isCorrect: option.id === question.correctAnswer,
+                  },
+                });
+              }
+
+              // For True/False questions, add empty C and D options
+              if (isTrueFalseQuestion) {
+                const missingOptions = ['C', 'D'].filter(id => 
+                  !question.options.some(o => o.id === id)
+                );
+                
+                for (const missingLabel of missingOptions) {
+                  await tx.option.create({
+                    data: {
+                      questionId: createdQuestion.id,
+                      label: missingLabel,
+                      optionText: '',
+                      isCorrect: false,
+                    },
+                  });
+                }
+              }
+            }
+          }, {
+            maxWait: 5000,  // 5 seconds max wait
+            timeout: 10000, // 10 seconds timeout per batch
+          });
+
+          questionsUploaded += batch.length;
+          console.log(`✅ Batch ${batchNumber} completed. Progress: ${questionsUploaded}/${questions.length}`);
+          
+          // Small delay to prevent overwhelming the database
+          await new Promise(resolve => setTimeout(resolve, 100));
+          
+        } catch (batchError) {
+          console.error(`❌ Error in batch ${batchNumber}:`, batchError);
+          errorsEncountered += batch.length;
+          
+          // Continue with next batch instead of failing completely
+          continue;
+        }
+      }
+
+      console.log(`Upload completed. Success: ${questionsUploaded}, Errors: ${errorsEncountered}`);
+
+      // Update the test with actual question count if different
+      if (questionsUploaded !== questions.length) {
+        await prisma.test.update({
+          where: { id: test.id },
+          data: { totalQuestions: questionsUploaded },
+        });
+      }
       
       // Return success response
       return NextResponse.json({
         status: 'success',
         message: 'Test created successfully',
         data: {
-          testId: result.testId,
-          title: result.title,
-          totalQuestions: result.totalQuestions,
-          questionsUploaded: questions.length,
+          testId: test.id,
+          title: test.title,
+          totalQuestions: questionsUploaded,
+          questionsUploaded: questionsUploaded,
+          errorsEncountered: errorsEncountered,
         }
       });
     } catch (dbError) {
