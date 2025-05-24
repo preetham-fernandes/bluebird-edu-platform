@@ -1,7 +1,15 @@
 // src/app/api/admin/bulk-upload/route.ts
+// TypeScript-safe version with proper types
 import { NextRequest, NextResponse } from 'next/server';
 import { parseTxtFile } from '@/lib/fileProcessing/textParser';
 import prisma from '@/lib/db/prisma';
+
+// Define interfaces for better type safety
+interface CreatedQuestion {
+  id: number;
+  questionNumber: number;
+  testId: number;
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -60,8 +68,10 @@ export async function POST(request: NextRequest) {
     const txtText = new TextDecoder().decode(fileBuffer);
     const questions = await parseTxtFile(txtText);
 
-    // First, deactivate any existing active tests for this title
-    await prisma.test.updateMany({
+    // Use a transaction with increased timeout for bulk operations
+    const result = await prisma.$transaction(async (tx) => {
+      // First, deactivate any existing active tests for this title
+      await tx.test.updateMany({
         where: {
           titleId: subject.id,
           isActive: true,
@@ -71,83 +81,132 @@ export async function POST(request: NextRequest) {
         },
       });
       
-      // Then create a new test entry
-      const test = await prisma.test.create({
+      // Create a new test entry
+      const test = await tx.test.create({
         data: {
           title: `${subject.name} Test`,
           titleId: subject.id,
           aircraftId: aircraftIdNum,
           totalQuestions: questions.length,
-          // timeLimit is optional, typically set for mock tests
           timeLimit: null, 
-          updatedBy: 1, // Admin ID (would be from auth context in real app)
+          updatedBy: 1, // Admin ID
           isActive: true,
         },
       });
 
-    // Create questions and options
-    const errorsEncountered = 0;
-    const questionsUploaded = questions.length;
+      // Prepare bulk data for questions
+      const questionsData = questions.map((question, index) => ({
+        testId: test.id,
+        questionNumber: index + 1,
+        questionText: question.text,
+        correctAnswer: question.correctAnswer,
+        explanation: question.explanation || null,
+      }));
 
-    for (let i = 0; i < questions.length; i++) {
-      const question = questions[i];
-      
-      // Create the question
-      const createdQuestion = await prisma.question.create({
-        data: {
+      // Bulk create questions
+      await tx.question.createMany({
+        data: questionsData,
+      });
+
+      // Get the created questions (they should be sequential)
+      const createdQuestions = await tx.question.findMany({
+        where: {
           testId: test.id,
-          questionNumber: i + 1, // Use sequential numbers regardless of what's in the file
-          questionText: question.text,
-          correctAnswer: question.correctAnswer,
-          explanation: question.explanation || null,
+        },
+        orderBy: {
+          questionNumber: 'asc',
+        },
+        select: {
+          id: true,
+          questionNumber: true,
+          testId: true,
         },
       });
 
-      // Create options for this question - supporting both multiple choice and True/False
-      const isTrueFalseQuestion = question.options.length === 2;
+      // Prepare bulk data for options
+      const optionsData: Array<{
+        questionId: number;
+        label: string;
+        optionText: string;
+        isCorrect: boolean;
+      }> = [];
 
-      // Create the available options
-      for (const option of question.options) {
-        await prisma.option.create({
-          data: {
+      createdQuestions.forEach((createdQuestion: CreatedQuestion, questionIndex: number) => {
+        const question = questions[questionIndex];
+        const isTrueFalseQuestion = question.options.length === 2;
+
+        // Add the available options
+        question.options.forEach(option => {
+          optionsData.push({
             questionId: createdQuestion.id,
             label: option.id,
             optionText: option.text,
             isCorrect: option.id === question.correctAnswer,
-          },
+          });
+        });
+
+        // If it's a True/False question, add empty C and D options for database integrity
+        if (isTrueFalseQuestion) {
+          const missingOptions = ['C', 'D'].filter(id => 
+            !question.options.some(o => o.id === id)
+          );
+          
+          missingOptions.forEach(missingLabel => {
+            optionsData.push({
+              questionId: createdQuestion.id,
+              label: missingLabel,
+              optionText: '',
+              isCorrect: false,
+            });
+          });
+        }
+      });
+
+      // Bulk create options in chunks to avoid memory issues
+      const CHUNK_SIZE = 1000;
+      for (let i = 0; i < optionsData.length; i += CHUNK_SIZE) {
+        const chunk = optionsData.slice(i, i + CHUNK_SIZE);
+        await tx.option.createMany({
+          data: chunk,
         });
       }
 
-      // If it's a True/False question, we need to ensure database integrity by adding empty C and D options
-      if (isTrueFalseQuestion) {
-        const missingOptions = ['C', 'D'].filter(id => !question.options.some(o => o.id === id));
-        
-        for (const missingLabel of missingOptions) {
-          await prisma.option.create({
-            data: {
-              questionId: createdQuestion.id,
-              label: missingLabel,
-              optionText: '', // Empty text for missing options
-              isCorrect: false,
-            },
-          });
-        }
-      }
-    }
+      return {
+        test,
+        questionsUploaded: questions.length,
+        errorsEncountered: 0,
+      };
+    }, {
+      maxWait: 20000, // 20 seconds max wait
+      timeout: 30000, // 30 seconds timeout
+    });
 
     // Return success response with summary
     return NextResponse.json({
       status: 'success',
-      questionsUploaded,
-      errorsEncountered,
+      questionsUploaded: result.questionsUploaded,
+      errorsEncountered: result.errorsEncountered,
       test: {
-        id: test.id,
-        title: test.title,
-        totalQuestions: test.totalQuestions,
+        id: result.test.id,
+        title: result.test.title,
+        totalQuestions: result.test.totalQuestions,
       },
     });
+
   } catch (error) {
     console.error('Error in bulk upload:', error);
+    
+    // Handle specific Prisma timeout errors
+    if (error instanceof Error && error.message.includes('Transaction')) {
+      return NextResponse.json(
+        { 
+          error: 'Upload timeout - file too large or complex',
+          message: 'Please try uploading a smaller file or contact support for assistance with large uploads.' 
+        },
+        { status: 408 }
+      );
+    }
+    
     return NextResponse.json(
       { 
         error: 'Failed to process upload',

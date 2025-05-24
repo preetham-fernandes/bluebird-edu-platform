@@ -1,119 +1,155 @@
-// src/app/api/debug/db/route.ts
+// Create this file: src/app/api/debug/db/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db/prisma';
 
+interface Title {
+  id: number;
+  name: string;
+  slug: string;
+  aircraftId: number;
+  testTypeId: number;
+  createdAt: Date;
+  updatedAt: Date;
+  // Add any other properties that are relevant
+}
+
 export async function GET(request: NextRequest) {
   try {
-    console.log('Testing database connection...');
+    console.log('Starting comprehensive database debug...');
     
-    // Test basic connection
-    await prisma.$connect();
-    console.log('✅ Database connected successfully');
-
-    // Check if Aircraft table exists and has data
-    const aircraftCount = await prisma.aircraft.count();
-    console.log(`✅ Found ${aircraftCount} aircraft records`);
-    
+    // Get all data with relationships
     const aircraft = await prisma.aircraft.findMany();
-    console.log('Aircraft records:', aircraft);
-
-    // Check if TestType table exists and has data
-    const testTypeCount = await prisma.testType.count();
-    console.log(`✅ Found ${testTypeCount} test type records`);
-    
     const testTypes = await prisma.testType.findMany();
-    console.log('TestType records:', testTypes);
-
-    // Check if Title table exists and has data
-    const titleCount = await prisma.title.count();
-    console.log(`✅ Found ${titleCount} title records`);
-    
     const titles = await prisma.title.findMany({
       include: {
         aircraft: true,
-        testType: true
+        testType: true,
+        tests: {
+          where: { isActive: true },
+          include: {
+            questions: {
+              include: {
+                options: true
+              }
+            }
+          }
+        }
       }
     });
-    console.log('Title records with relations:', titles);
-
-    // Test the specific query that's failing
-    const aircraftSlug = 'boeing-737-max';
-    const testTypeSlug = 'practice';
     
-    console.log(`🔍 Looking for aircraft with slug: ${aircraftSlug}`);
+    // Also get all tests separately to see what's there
+    const allTests = await prisma.test.findMany({
+      include: {
+        questions: {
+          include: {
+            options: true
+          }
+        },
+        titleRef: true
+      }
+    });
+    
+    const stats = {
+      aircraftCount: aircraft.length,
+      testTypeCount: testTypes.length,
+      titleCount: titles.length,
+      testCount: allTests.length,
+      totalQuestions: allTests.reduce((sum, test) => sum + test.questions.length, 0)
+    };
+    
+    const detailedData = {
+      aircraft: aircraft.map(a => ({ 
+        id: a.id, 
+        name: a.name, 
+        slug: a.slug 
+      })),
+      testTypes: testTypes.map(t => ({ 
+        id: t.id, 
+        type: t.type, 
+        slug: t.slug 
+      })),
+      titles: titles.map(t => ({
+        id: t.id,
+        name: t.name,
+        slug: t.slug,
+        aircraftId: t.aircraftId,
+        testTypeId: t.testTypeId,
+        createdAt: t.createdAt,
+        updatedAt: t.updatedAt,
+        aircraft: t.aircraft,
+        testType: t.testType,
+        testsCount: t.tests.length,
+        tests: t.tests.map(test => ({
+          id: test.id,
+          title: test.title,
+          isActive: test.isActive,
+          questionCount: test.questions.length
+        }))
+      })),
+      allTests: allTests.map(test => ({
+        id: test.id,
+        title: test.title,
+        titleId: test.titleId,
+        aircraftId: test.aircraftId,
+        isActive: test.isActive,
+        questionCount: test.questions.length,
+        sampleQuestions: test.questions.slice(0, 2).map(q => ({
+          id: q.id,
+          questionNumber: q.questionNumber,
+          questionText: q.questionText.substring(0, 100) + '...',
+          optionCount: q.options.length
+        }))
+      }))
+    };
+    
+    // Specific query for boeing-737-max + practice
     const aircraftEntity = await prisma.aircraft.findFirst({
       where: {
         OR: [
-          { slug: aircraftSlug },
-          { 
-            name: {
-              contains: aircraftSlug.split('-').join(' ')
-            } 
-          }
+          { slug: 'boeing-737-max' },
+          { name: { contains: 'Boeing 737 MAX' } }
         ]
       }
     });
-    console.log('Found aircraft:', aircraftEntity);
-
-    console.log(`🔍 Looking for test type: ${testTypeSlug}`);
+    
     const testTypeEntity = await prisma.testType.findFirst({
       where: {
-        type: {
-          equals: testTypeSlug
-        }
+        OR: [
+          { type: 'practice' },
+          { slug: 'practice' }
+        ]
       }
     });
-    console.log('Found test type:', testTypeEntity);
-
+    
+    let matchingTitles: Title[] = [];
     if (aircraftEntity && testTypeEntity) {
-      console.log(`🔍 Looking for titles with aircraftId: ${aircraftEntity.id}, testTypeId: ${testTypeEntity.id}`);
-      const matchingTitles = await prisma.title.findMany({
+      matchingTitles = await prisma.title.findMany({
         where: {
           aircraftId: aircraftEntity.id,
           testTypeId: testTypeEntity.id
-        },
-        include: {
-          tests: {
-            where: { isActive: true }
-          }
         }
       });
-      console.log('Matching titles:', matchingTitles);
     }
-
+    
+    console.log('Debug complete. Stats:', stats);
+    
     return NextResponse.json({
       success: true,
-      stats: {
-        aircraftCount,
-        testTypeCount,
-        titleCount
-      },
-      data: {
-        aircraft,
-        testTypes,
-        titles: titles.slice(0, 5) // Limit to first 5 for brevity
-      },
+      stats,
+      data: detailedData,
       specificQuery: {
         aircraftEntity,
         testTypeEntity,
-        matchingTitles: aircraftEntity && testTypeEntity ? await prisma.title.findMany({
-          where: {
-            aircraftId: aircraftEntity.id,
-            testTypeId: testTypeEntity.id
-          }
-        }) : null
-      }
+        matchingTitles
+      },
+      timestamp: new Date().toISOString()
     });
-
   } catch (error) {
-    console.error('❌ Database connection failed:', error);
-    
+    console.error('Database debug error:', error);
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined
     }, { status: 500 });
-  } finally {
-    await prisma.$disconnect();
   }
 }

@@ -16,7 +16,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Bluebird Edu",
+  title: "BlueBirdEdu",
   description: "Mock test platform for pilot exam preparation",
   icons: {
     icon: "/bluebird-logo-white.svg",
